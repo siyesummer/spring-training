@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+    version="4.0"
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:javaee="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xml="http://www.w3.org/XML/1998/namespace"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
+  <display-name>Archetype Created Web Application</display-name>
+
+  <servlet>
+    <servlet-name>hello</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.HealthServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>hello</servlet-name>
+    <url-pattern>/health</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>register</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.RegisterServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>register</servlet-name>
+    <url-pattern>/api/register</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>registerPage</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.RegisterPageServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>registerPage</servlet-name>
+    <url-pattern>/register</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>loginPage</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.LoginPageServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>loginPage</servlet-name>
+    <url-pattern>/login</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>login</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.LoginServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>login</servlet-name>
+    <url-pattern>/api/login</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>currentUser</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.CurrentUserServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>currentUser</servlet-name>
+    <url-pattern>/api/me</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>logout</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.LogoutServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>logout</servlet-name>
+    <url-pattern>/api/logout</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>messagePage</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.MessagePageServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>messagePage</servlet-name>
+    <url-pattern>/message</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>messagesApi</servlet-name>
+    <servlet-class>cn.siyes.training.web.servlet.MessageServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>messagesApi</servlet-name>
+    <url-pattern>/api/messages</url-pattern>
+  </servlet-mapping>
+
+  <filter>
+    <filter-name>apiFilter</filter-name>
+    <filter-class>cn.siyes.training.web.filter.ApiFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>apiFilter</filter-name>
+    <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>RequestLogFilter</filter-name>
+    <filter-class>cn.siyes.training.web.filter.RequestLogFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>RequestLogFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>LoginRequiredFilter</filter-name>
+    <filter-class>cn.siyes.training.web.filter.LoginRequiredFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>LoginRequiredFilter</filter-name>
+    <url-pattern>/messages</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>LoginRequiredFilter</filter-name>
+    <url-pattern>/api/messages/*</url-pattern>
+  </filter-mapping>
+
+  <listener>
+    <listener-class>cn.siyes.training.web.listener.FirstContextListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>cn.siyes.training.web.listener.FirstSessionListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>cn.siyes.training.web.listener.FirstServletRequestListener</listener-class>
+  </listener>
+</web-app>
