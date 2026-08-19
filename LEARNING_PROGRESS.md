@@ -18,7 +18,7 @@
 
 - `linux-server` 主要由 AI 生成，当前只作为阅读、审查、修改和复盘目标。
 - 尚未通过 `spring-training` 的独立 Module 证明 Spring Boot 能力。
-- Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；下一步进入 Spring Core。
+- Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力，下一步进入 Spring Core。
 
 ## Module 验收记录
 
@@ -32,6 +32,13 @@
 - 已验证部署证据：IDEA Tomcat 已部署 `target/01-java-web-basics.war`，实际 Context Path 为 `/01_java_web_basics_war`；部署后的 `/health` 返回 `200`，重新登录返回 `200` 和新 `JSESSIONID`，登录后 `/api/messages` 返回 `200`。
 - Listener 验收证据：Tomcat 启动日志出现 `contextInitialized`，Session 创建日志出现数量 `1`、`2`，Session 销毁日志回到 `1`、`0`；Tomcat 停止日志出现 `contextDestroyed`，证明两个 Listener 已注册并收到对应生命周期回调。
 - 结论：本 Module 的 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和部署等核心内容已通过手动实践和真实运行证据，状态更新为“已完成”。JUnit、Maven 命令和异常记录作为辅助工程能力，不作为主要学习成果。
+
+### 01-java-web-basics 代码复盘结论（2026-08-19）
+
+- 能力结论：已达到“能够独立手写并解释原生 Java Web 基础项目”的阶段，具备进入 `02-spring-core` 的条件。
+- 主要优点：分层方向基本正确；Servlet、Filter、Listener、Session、Service、DAO 和 MySQL 调用关系清晰；已经实际处理 BCrypt、参数化 SQL、唯一约束、事务提交和回滚。
+- 主要边界：`ResultSet` 关闭不够一致；依赖仍通过手动 `new` 管理；响应和参数模型较原始；JSON 手动拼接不具备完整转义能力；Listener 计数不是并发安全实现；`web.xml` 命名空间仍需从旧 Java EE 描述符迁移到 Jakarta 6 格式。
+- 能力判断：这些问题不影响本阶段学习目标和已完成结论，但说明当前水平是“扎实的原生 Web 入门和独立动手能力”，还不是生产级 Java 后端工程能力。
 
 后续每个 Module 完成后，记录以下内容：
 

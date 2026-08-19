@@ -1,6 +1,6 @@
 # 当前 Java 能力基线
 
-> 评估日期：2026-08-18
+> 评估日期：2026-08-19
 > 评估依据：用户手写的 `tank-game`、`chat-room`，以及 `01-java-web-basics` 中独立完成的 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和 Tomcat 部署实践。
 > `linux-server` 主要由 AI 生成，只作为阅读和审查对象，不计入用户独立编码能力。
 
@@ -8,13 +8,13 @@
 
 当前水平可以判断为：
 
-> 已完成 Java 基础和 Java Web 基础 Module 的实践闭环，能够使用 Java 完成原生 Servlet Web 服务、Filter/Listener 生命周期处理、Session 登录、JDBC 数据访问、事务和 WAR 部署；下一步进入 Spring Core，继续从“能实现功能”过渡到“能理解框架设计和工程边界”。
+> 已完成 Java 基础和 Java Web 基础 Module 的实践闭环，能够独立完成一个包含 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署的原生 Java Web 小服务；下一步进入 Spring Core，继续从“能实现功能”过渡到“能理解框架设计和工程边界”。
 
 这意味着：
 
 - 已经越过只会语法、控制台小题和单文件练习的阶段。
 - 具备继续学习 Java Web、Spring、Spring MVC 和 MyBatis 的基础。
-- 暂时不能认定已经具备独立设计生产级 Java 服务的能力。
+- 目前具备的是“能够独立完成和解释学习型 Java Web 服务”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
 - Spring Boot 能力尚未通过独立手写项目和系统验收得到证明。
 
 ## 二、已有能力与代码证据
@@ -84,7 +84,9 @@
 - 用户和消息数据能够持久化到 MySQL。
 - 发布资料包含数据库初始化和连接配置说明。
 
-当前边界：事务边界、批量操作、索引设计、SQL 性能、连接资源管理、隔离级别和一致性问题还没有得到系统训练。
+当前判断：已经在 `01-java-web-basics` 中独立使用 `PreparedStatement`、`ResultSet`、生成主键、`try-with-resources` 和显式事务完成 MySQL 写入；能够解释同一 Connection 如何覆盖两次写操作，以及 `commit()` / `rollback()` 的边界。
+
+当前边界：连接池、批量操作、索引设计、SQL 性能、隔离级别、并发一致性和生产级数据访问抽象还没有得到系统训练。现有代码中 `UserDao.existsByUsername` 的 `ResultSet` 没有显式使用 `try-with-resources`，说明资源管理原则已经会用，但还没有做到所有路径都一致。
 
 ### 2.5 工程交付意识
 
@@ -99,7 +101,46 @@
 - `chat-room` 有 `build.ps1`、打包指南、发布目录和客户端/服务端启动脚本。
 - 已经处理过 Windows 中文路径、命令行编码和外部配置问题。
 
-当前判断：工程意识是明显优势，但后续应迁移到 Maven 标准目录、自动化测试、环境配置、日志和可重复构建体系。
+当前判断：工程意识是明显优势。已经迁移到 Maven 标准目录，完成了环境变量、日志、WAR 构建和 Tomcat 部署；后续需要继续加强统一响应、异常分层、依赖注入、可重复验收和生产配置管理。
+
+### 2.6 `01-java-web-basics` 代码能力评价
+
+本 Module 的代码能够证明以下能力已经从“看过概念”进入“亲手实现并运行”：
+
+- 能用 `web.xml` 配置 Servlet、Filter 和 Listener，并理解 Tomcat 的对象创建与生命周期回调。
+- 能把请求参数、Session、业务 Service、DAO 和 MySQL 串成可运行的注册、登录和留言流程。
+- 能使用 `getSession(false)` 做登录状态判断，使用 Session 保存用户身份，并在登录时调用 `changeSessionId()`。
+- 能使用 BCrypt 保存密码哈希，而不是保存明文密码；能将数据库唯一约束异常转换为业务冲突。
+- 能让多个 DAO 共用同一条 Connection，在 Service 层控制事务提交与回滚，并通过故障验证回滚结果。
+- 能完成从 Maven 编译、WAR 打包到 IDEA/Tomcat 部署的基本交付闭环。
+
+代码中体现出的主要优点：
+
+- 分层方向基本正确：Servlet 负责 HTTP 适配，Service 负责业务流程，DAO 负责 SQL，Filter/Listener 负责容器横切机制。
+- 能主动处理资源生命周期，而不是把 Connection 保存为静态全局对象；事务边界放在 Service 也符合业务操作组合的职责。
+- 能使用参数化 SQL、唯一索引和 BCrypt，已经具备基本的安全意识和数据一致性意识。
+- 能通过实际错误验证设计，而不是只验证成功页面，说明有初步的问题定位和边界意识。
+
+代码中需要继续改进的边界：
+
+- `UserDao.existsByUsername` 没有显式关闭 `ResultSet`；资源所有权和关闭习惯需要在后续 Module 中做到一致。
+- Service 和 Servlet 每次手动 `new` DAO/Service，适合本阶段理解调用关系，但还没有体现依赖注入、对象复用和容器管理，这正是 Spring Core 要解决的问题。
+- `BaseServlet` 使用 `String[]` 传递参数并用 `null` 作为失败信号，`createResponse` 和留言响应手动拼接 JSON，尚未形成类型安全的请求对象、响应对象和统一异常处理。
+- 当前 JSON 拼接没有完整处理引号、换行和 HTML 等字符的转义；这不影响本阶段理解 Servlet 链路，但不能直接作为生产 API 响应方案。
+- `FirstSessionListener` 使用普通 `int` 统计并发 Session，适合观察回调，不足以作为线程安全的在线人数实现。
+- `web.xml` 仍使用旧 Java EE 4.0 命名空间，而代码使用 Jakarta Servlet 6 API；Tomcat 当前能够运行，但后续应统一为 Jakarta 6 的描述符格式。
+
+综合评价：你已经达到“能够独立手写并解释原生 Java Web 基础项目”的阶段，具备进入 Spring Core 的条件。当前最重要的提升方向不是继续堆 Servlet API，而是理解 Spring 如何用 IoC、DI、Bean 生命周期、代理和 AOP 管理并抽象这些手动代码。
+
+### 2.7 阶段能力定位
+
+| 能力层级 | 当前判断 | 依据 |
+| --- | --- | --- |
+| Java 基础与项目动手 | 已具备 | 独立手写 `tank-game`、`chat-room`，并能持续修改和运行项目 |
+| 原生 Java Web 基础 | 已具备入门到初级独立实践能力 | `01-java-web-basics` 完成 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署 |
+| Java Web 工程化 | 初步具备 | 已有 Maven、环境变量、日志、测试和部署意识，但抽象、并发和统一响应仍较原始 |
+| Spring / Spring Boot | 尚未证明 | 还没有在训练项目中独立实现 IoC、DI、AOP、Spring MVC 或 Boot 自动配置 |
+| 生产级后端设计 | 尚未证明 | 尚未系统验证并发、连接池、统一错误模型、数据一致性、可观测性和安全边界 |
 
 ## 三、两个手写项目的客观评价
 
@@ -154,9 +195,14 @@
 - MyBatis Mapper、动态 SQL、结果映射和 Spring 事务整合。
 - Spring Boot 自动配置、Starter、Profile、配置绑定和测试体系。
 - REST API 设计、状态码、幂等、分页和统一错误响应。
-- 单元测试、Web 层测试、数据库集成测试和并发测试。
-- 从零设计表结构、分层、事务边界和工程目录。
-- 独立完成构建、打包、部署、健康检查和回滚。
+- Web 层测试、数据库集成测试和并发测试。
+- 复杂业务下的表结构、索引、幂等、并发和事务设计。
+
+这些内容仍未被本 Module 证明：
+
+- 生产级线程安全、连接池使用、统一 JSON 序列化和全局异常处理。
+- 复杂并发下的 Session、事务隔离、幂等和一致性设计。
+- 通过框架完成可维护的依赖注入、配置绑定和模块化测试。
 
 这些能力将通过 `JAVA_STUDY_PLAN.md` 中的 Module 逐项验证。
 
@@ -186,7 +232,7 @@
 - 使用 Servlet 完成参数获取、JSON 或页面响应、Cookie、Session 和登录拦截。
 - 使用 JDBC + `PreparedStatement` 完成数据库操作。
 - 明确事务提交与回滚边界。
-- 使用 Maven 构建标准 Java Web 项目。
+- 使用 Maven 构建标准 Java Web 项目，并将 WAR 部署到 Tomcat。
 - 通过 Listener 观察 Web 应用和 Session 生命周期回调。
 - 使用手动请求和运行日志完成核心功能验收；自动化测试作为辅助能力理解。
 
