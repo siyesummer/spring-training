@@ -175,7 +175,7 @@ E:\本地项目\java-project\linux-server
 ## 当前状态
 
 - Java 基础：已完成第一轮学习和两个项目实践。
-- Java Web + Spring：学习中，`01-java-web-basics` 已完成，下一阶段进入 Spring Core。
-- `spring-training`：已调整为 Maven 聚合根项目并加入 `01-java-web-basics`；原生 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和部署已完成主要练习。
+- Java Web + Spring：学习中，`01-java-web-basics` 已完成，`02-spring-core` 的纯 XML 配置轮已完成，下一步进入纯注解 / Java 配置轮。
+- `spring-training`：已调整为 Maven 聚合根项目并加入 `01-java-web-basics`、`02-spring-core`；原生 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和部署已完成主要练习，Spring Core 正按 XML -> 注解两轮进行。
 - `linux-server`：主要由 AI 生成，当前定位为对照阅读和代码审查对象。
 - 最终验收：能够独立搭建一个有数据库、REST API、校验、测试、配置和部署说明的 Spring Boot 项目。

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Java 基础 | 已完成 | 已手写 `tank-game`、`chat-room`；当前能力与项目评价见 `CURRENT_LEVEL.md` |
 | Java Web 基础 | 已完成 | 已完成 Tomcat、MySQL、JDBC、用户注册、登录/Session/登出、Filter、Listener、留言板、事务提交/回滚/恢复、WAR 构建和部署复测；核心技术复盘已完成 |
-| Spring Core | 未开始 | 待创建 `02-spring-core` |
+| Spring Core | 进行中 | `02-spring-core` 的纯 XML 配置轮已完成，复盘后进入纯注解 / Java 配置轮 |
 | Spring MVC | 未开始 | 待创建 `03-spring-mvc` |
 | MyBatis | 未开始 | 待创建 `04-mybatis` |
 | Spring Boot | 未开始 | 待创建 `05-spring-boot` |
@@ -18,7 +18,8 @@
 
 - `linux-server` 主要由 AI 生成，当前只作为阅读、审查、修改和复盘目标。
 - 尚未通过 `spring-training` 的独立 Module 证明 Spring Boot 能力。
-- Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力，下一步进入 Spring Core。
+- Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力。
+- Spring Core 当前安排：只创建一个 `02-spring-core` Module，使用同一个账户扣款与操作日志主题，先纯 XML、后纯注解 / Java 配置；两轮放在不同包中进行对照。
 
 ## Module 验收记录
 
@@ -39,6 +40,16 @@
 - 主要优点：分层方向基本正确；Servlet、Filter、Listener、Session、Service、DAO 和 MySQL 调用关系清晰；已经实际处理 BCrypt、参数化 SQL、唯一约束、事务提交和回滚。
 - 主要边界：`ResultSet` 关闭不够一致；依赖仍通过手动 `new` 管理；响应和参数模型较原始；JSON 手动拼接不具备完整转义能力；Listener 计数不是并发安全实现；`web.xml` 命名空间仍需从旧 Java EE 描述符迁移到 Jakarta 6 格式。
 - 能力判断：这些问题不影响本阶段学习目标和已完成结论，但说明当前水平是“扎实的原生 Web 入门和独立动手能力”，还不是生产级 Java 后端工程能力。
+
+### 02-spring-core XML 轮记录（2026-08-19）
+
+- 状态：进行中，纯 XML 轮核心练习和复盘已完成，下一步开始纯注解 / Java 配置轮。
+- Module 形式：普通 Maven `jar` Module，不使用 Tomcat、Spring MVC 或 Spring Boot。
+- 练习顺序：第一轮纯 XML，第二轮纯注解 / Java 配置；XML 轮完成并复盘后才开始注解轮。
+- 当前文档：`02-spring-core/README.md` 为两轮总览，`02-spring-core/docs/XML_GUIDE.md` 为 XML 轮引导，`02-spring-core/docs/XML复盘.md` 为 XML 轮复盘。
+- 已完成证据：AOP 验收中，`invocation.proceed()` 正常时目标方法执行并打印耗时；注释后目标方法被截断；获取到 `AccountService$$SpringCGLIB$$1` 代理类；singleton 比较为 `true`、prototype 比较为 `false`；关闭容器时执行销毁回调。
+- 已完成事务证据：Navicat 中确认正常转账后两个账户余额为 `900.00`、`600.00`，并新增一条 `100.00` 日志；日志插入后主动抛出异常时，两个账户恢复为 `1000.00`、`500.00` 且日志记录回滚；删除模拟异常后再次成功提交，证明事务配置和故障恢复均正常。
+- 当前未完成：第二轮纯注解 / Java 配置实现；本 Module 尚未标记为“已完成”。
 
 后续每个 Module 完成后，记录以下内容：
 

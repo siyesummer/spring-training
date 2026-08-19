@@ -11,6 +11,7 @@
   <url>https://siyes.cn</url>
   <modules>
     <module>01-java-web-basics</module>
+    <module>02-spring-core</module>
   </modules>
 
   <properties>

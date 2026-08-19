@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           https://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/context
+           https://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/tx
+           https://www.springframework.org/schema/tx/spring-tx.xsd">
+    <bean id="accountRepository"
+          class="cn.siyes.training.spring.xml.repository.AccountRepository">
+        <constructor-arg ref="jdbcTemplate"></constructor-arg>
+    </bean>
+
+    <bean id="auditLogRepository"
+          class="cn.siyes.training.spring.xml.repository.AuditLogRepository">
+        <constructor-arg ref="jdbcTemplate"></constructor-arg>
+    </bean>
+<!--    <bean id="accountService"-->
+<!--          class="cn.siyes.training.spring.xml.service.AccountService">-->
+<!--        <constructor-arg ref="accountRepository"></constructor-arg>-->
+<!--        <constructor-arg ref="auditLogRepository"></constructor-arg>-->
+<!--    </bean>-->
+
+<!--    <bean id="lifecycleProbe"-->
+<!--          class="cn.siyes.training.spring.xml.lifecycle.LifecycleProbe"-->
+<!--          init-method="init"-->
+<!--          destroy-method="destroy"-->
+<!--    ></bean>-->
+
+<!--    <bean id="singletonProbe"-->
+<!--          class="cn.siyes.training.spring.xml.lifecycle.LifecycleProbe"-->
+<!--          scope="singleton"-->
+<!--    ></bean>-->
+<!--    <bean id="prototypeProbe"-->
+<!--          class="cn.siyes.training.spring.xml.lifecycle.LifecycleProbe"-->
+<!--          scope="prototype"-->
+<!--    ></bean>-->
+
+<!--  ProxyFactoryBean 实现AOP代理  -->
+<!--    <bean id="timingInterceptor"-->
+<!--          class="cn.siyes.training.spring.xml.aspect.TimingInterceptor"></bean>-->
+<!--    <bean id="accountServiceTarget"-->
+<!--          class="cn.siyes.training.spring.xml.service.AccountService">-->
+<!--        <constructor-arg ref="accountRepository"></constructor-arg>-->
+<!--        <constructor-arg ref="auditLogRepository"></constructor-arg>-->
+<!--    </bean>-->
+<!--    <bean id="accountService"-->
+<!--          class="org.springframework.aop.framework.ProxyFactoryBean">-->
+<!--        <property name="target" ref="accountServiceTarget"></property>-->
+<!--        <property name="interceptorNames">-->
+<!--            <list>-->
+<!--                <value>timingInterceptor</value>-->
+<!--            </list>-->
+<!--        </property>-->
+<!--    </bean>-->
+<!--<context:property-placeholder/> 的作用是：让 Spring 在创建 Bean 之前，解析 XML 中的 ${...} 占位符-->
+    <context:property-placeholder />
+
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        <property name="url" value="${DB_URL}"></property>
+        <property name="username" value="${DB_USERNAME}"></property>
+        <property name="password" value="${DB_PASSWORD}"></property>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg ref="dataSource"></constructor-arg>
+    </bean>
+
+<!--    JDBC 事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"></constructor-arg>
+    </bean>
+
+<!--  事务规则  -->
+    <tx:advice id="transactionAdvice"
+               transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="transfer"
+                       propagation="REQUIRED"
+                       isolation="READ_COMMITTED"
+                       rollback-for="java.lang.Exception"
+            />
+        </tx:attributes>
+    </tx:advice>
+
+    <bean id="timingInterceptor"
+          class="cn.siyes.training.spring.xml.aspect.TimingInterceptor">
+
+    </bean>
+
+    <aop:config proxy-target-class="true">
+<!--        切点(目标方法)-->
+        <aop:pointcut id="transferMethod" expression="execution(* cn.siyes.training.spring.xml.service.AccountService.transfer(..))"/>
+
+        <!--        切点(目标方法)-->
+        <aop:pointcut id="serviceMethod" expression="execution(* cn.siyes.training.spring.xml.service.AccountService.*(..))"/>
+<!--        耗时拦截器-->
+        <aop:advisor
+                advice-ref="timingInterceptor"
+                pointcut-ref="serviceMethod"
+                order="1"
+        />
+<!--        事务拦截器-->
+        <aop:advisor
+                advice-ref="transactionAdvice"
+                pointcut-ref="transferMethod"
+                order="2"
+        />
+    </aop:config>
+
+    <bean id="postProcessorProbe"
+          class="cn.siyes.training.spring.xml.postprocessor.PostProcessorProbe"
+          init-method="init">
+        <property name="label" value="from-xml"/>
+    </bean>
+
+    <bean id="probeDefinitionPostProcessor" class="cn.siyes.training.spring.xml.postprocessor.ProbeDefinitionPostProcessor"></bean>
+
+
+    <bean id="probeBeanPostProcessor" class="cn.siyes.training.spring.xml.postprocessor.ProbeBeanPostProcessor" />
+
+    <bean id="dynamicProbeRegistryPostProcessor"
+          class="cn.siyes.training.spring.xml.postprocessor.DynamicProbeRegistryPostProcessor" />
+</beans>

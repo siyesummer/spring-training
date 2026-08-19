@@ -8,7 +8,7 @@
 
 当前水平可以判断为：
 
-> 已完成 Java 基础和 Java Web 基础 Module 的实践闭环，能够独立完成一个包含 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署的原生 Java Web 小服务；下一步进入 Spring Core，继续从“能实现功能”过渡到“能理解框架设计和工程边界”。
+> 已完成 Java 基础和 Java Web 基础 Module 的实践闭环，能够独立完成一个包含 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署的原生 Java Web 小服务；当前进入 Spring Core，准备通过 XML 和注解两轮练习理解框架设计和工程边界。
 
 这意味着：
 
@@ -226,7 +226,7 @@
 
 ## 六、下一阶段判断标准
 
-当前下一步是 `02-spring-core`。进入下一阶段前，`01-java-web-basics` 已证明能够：
+当前正在进入 `02-spring-core`。`01-java-web-basics` 已证明能够：
 
 - 独立解释一次 HTTP 请求进入 Tomcat、经过 Filter、到达 Servlet 并返回响应的过程。
 - 使用 Servlet 完成参数获取、JSON 或页面响应、Cookie、Session 和登录拦截。
@@ -241,6 +241,8 @@
 - Spring IoC 容器如何创建、管理和注入对象。
 - Bean 生命周期、配置、代理和 AOP 的基本机制。
 - Spring 声明式事务与原生 JDBC 事务边界之间的关系。
+
+本阶段采用一个 Module 分两轮的方式：先纯 XML，再纯注解 / Java 配置。两轮使用同一业务主题，分别观察 Bean 定义来源变化对 IoC、DI、AOP 和事务代理的影响。
 
 ## 七、能力基线更新规则
 

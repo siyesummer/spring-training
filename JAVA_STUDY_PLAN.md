@@ -28,7 +28,7 @@
 | Module | 学习阶段 | 建议产物 | 核心验收结果 |
 | --- | --- | --- | --- |
 | `01-java-web-basics` | Servlet / HTTP / Tomcat / JDBC | 原生 Web 小服务 | 能解释请求生命周期，并完成参数、Cookie、Session、Filter 和 JDBC 操作 |
-| `02-spring-core` | IoC / DI / AOP / 事务基础 | Spring 容器练习 | 能解释 Bean 创建、注入、代理和事务边界 |
+| `02-spring-core` | IoC / DI / Bean 生命周期 / AOP / 事务基础 | 一个 Spring 容器练习，分纯 XML 和纯注解两轮 | 能分别用 XML 与注解完成 Bean 创建、注入、生命周期、代理和事务，并解释两种配置方式的差异 |
 | `03-spring-mvc` | MVC 请求处理 | REST API 小项目 | 能完成路由、参数绑定、校验、统一响应和异常处理 |
 | `04-mybatis` | Mapper / SQL 映射 | 数据访问项目 | 能完成 CRUD、动态 SQL、事务、分页并解释对象映射 |
 | `05-spring-boot` | Boot 自动配置与工程化 | 可运行 Boot 服务 | 能独立创建、配置、测试、打包和运行项目 |
@@ -96,9 +96,24 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 - 声明式事务的基本原理和事务失效的常见原因。
 - 为什么同一个类内部方法调用可能绕过代理。
 
-建议项目：订单或账户服务的内存版本，加入日志切面、权限切面或耗时统计，并用测试证明代理确实生效。
+本 Module 只创建一个普通 Maven `jar` 项目，分两轮完成同一个账户扣款与操作日志练习：
 
-验收建议：打印或断点观察 Bean 生命周期；验证构造器注入；验证切面是否在目标方法前后执行；制造异常确认事务能够回滚；单独验证内部方法调用导致的代理失效场景。
+1. 第一轮使用纯 XML：`ClassPathXmlApplicationContext`、`<bean>`、构造器/Setter 注入、XML AOP 和 XML 事务配置；业务类不使用 Spring 组件、配置、切面和事务注解。
+2. 第二轮使用纯注解 / Java 配置：`AnnotationConfigApplicationContext`、组件注解、`@Configuration`、`@Bean`、`@Aspect`、`@EnableAspectJAutoProxy` 和 `@Transactional`，重新实现同一组能力。
+3. 两轮代码放在不同包中，先完成 XML 轮并复盘，再开始注解轮；不能在 XML 轮提前混入注解。
+
+第一轮先使用内存 Repository 观察 IoC、DI、Bean 生命周期和代理机制；事务主线稳定后，再根据引导选择是否接入 MySQL。不要让数据库配置遮挡 Spring Core 容器本身。
+
+当前详细引导维护在：
+
+```text
+02-spring-core/README.md
+02-spring-core/docs/XML_GUIDE.md
+```
+
+建议项目：账户扣款与操作日志的内存版本，加入耗时切面和事务边界；XML 轮与注解轮使用同一业务主题进行对照。测试或 Maven 命令只作为辅助确认，重点是观察容器、代理和事务行为。
+
+验收建议：打印或断点观察 Bean 生命周期；分别验证 XML 和注解下的构造器注入；验证切面是否在目标方法前后执行；制造异常确认事务能够回滚；单独验证内部方法调用导致的代理失效场景；最后用自己的话比较两轮配置差异。
 
 ### 4.3 `03-spring-mvc`
 
@@ -217,6 +232,6 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 ## 七、当前起点
 
 - Java 基础：已完成第一轮学习和两个手写项目实践。
-- Java Web + Spring：学习中，`01-java-web-basics` 已完成，下一步进入 `02-spring-core`。
-- `spring-training`：已完成 `01-java-web-basics` 的原生 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署练习。
+- Java Web + Spring：学习中，`01-java-web-basics` 已完成，`02-spring-core` 的纯 XML 配置轮已完成，下一步进入纯注解 / Java 配置轮。
+- `spring-training`：已完成 `01-java-web-basics` 的原生 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署练习，正在进入 Spring Core 的 XML/注解双轮练习。
 - `linux-server`：主要由 AI 生成，当前仅作为对照阅读和代码审查对象。
