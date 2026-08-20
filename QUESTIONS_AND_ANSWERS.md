@@ -20,6 +20,7 @@
 6. [自己编写的 JSP 应该放在哪个目录？](#6-自己编写的-jsp-应该放在哪个目录)
 7. [使用 IDEA 启动 Tomcat 时，JDBC 环境变量在哪里配置？](#7-使用-idea-启动-tomcat-时jdbc-环境变量在哪里配置)
 8. [JSP 页面放在 WEB-INF 下，为什么访问页面会 404？](#8-jsp-页面放在-web-inf-下为什么访问页面会-404)
+29. [Spring 中的 Repository 是否相当于 Java Web 中的 DAO？](#29-spring-中的-repository-是否相当于-java-web-中的-dao)
 
 ## 1. 现代前后端分离项目的 Java 后端一般都使用 Spring MVC 提供接口吗？
 
@@ -814,3 +815,60 @@ mvn -pl 01-java-web-basics clean test
 日常使用的 `war exploded` 是展开目录，最终验收需要让 IDEA Tomcat 部署 `01-java-web-basics/target/01-java-web-basics.war`。在 `Run -> Edit Configurations -> tomcat-javaweb -> Deployment` 中停止并暂时移除旧的 `war exploded`，通过 `External Source` 选择该 WAR，Application context 保持 `/01_java_web_basics`，然后完全重启 Tomcat。
 
 部署后先访问 `/01_java_web_basics/health`，预期 `200` 和 `{"status":"ok"}`。重新部署会使旧 Session 失效，因此必须重新登录取得新的 `JSESSIONID`，再访问 `/01_java_web_basics/api/messages`，预期 `200`。`404` 优先检查 Context Path，`401` 重新登录，`500` 检查 IDEA Tomcat 运行配置中的 JDBC 环境变量和服务端日志。完整操作和 curl 命令见 Module README 的 `6.7`。
+
+## 29. Spring 中的 Repository 是否相当于 Java Web 中的 DAO？
+
+**简短结论：在当前 Spring Core 练习中，可以把 `Repository` 理解为 Java Web 阶段的 DAO；二者都属于数据访问层，但命名强调的角度不同。**
+
+两轮练习中的分层可以对应为：
+
+```text
+原生 Java Web：
+Servlet -> Service -> DAO -> JDBC -> MySQL
+
+当前 Spring Core：
+应用入口 -> Service -> Repository -> JdbcTemplate -> MySQL
+```
+
+因此，在当前项目中：
+
+```text
+@Repository 标注的数据访问类 ≈ Java Web 阶段的 DAO
+```
+
+二者的区别主要体现在命名语义和 Spring 提供的容器能力上：
+
+- `DAO` 是 Data Access Object 的缩写，强调它是负责访问数据库的对象，方法通常直接体现增删改查和 SQL 操作。
+- `Repository` 强调它是业务对象或领域对象的存取入口，方法通常使用 `findById`、`save`、`updateBalance` 等业务含义更明确的名称。
+- `@Repository` 是 Spring 的组件注解。配合组件扫描后，Spring 会把这个类注册为 Bean，因而可以通过构造器注入 `JdbcTemplate` 等依赖。
+- 在启用了 Spring 持久层异常转换的环境中，`@Repository` 还可以参与把部分底层数据库异常转换为 Spring 统一的 `DataAccessException` 异常体系；不能把它理解成仅仅换了一个 DAO 类名。
+
+当前注解练习中的数据访问类可以写成：
+
+```java
+@Repository
+public class AccountRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public AccountRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public int updateBalance(Long accountId, BigDecimal amount) {
+        // 使用 jdbcTemplate 执行 SQL
+    }
+}
+```
+
+这里的 `AccountRepository` 与 Java Web 阶段的 `AccountDao` 承担同一层职责：封装数据库访问，不负责 HTTP 响应，也不承担完整的转账业务流程。事务边界通常放在调用多个 Repository 方法的 Service 层。
+
+后续学习 MyBatis 时还会遇到 `Mapper`：
+
+```text
+DAO        通用的数据访问层名称
+Repository Spring 项目中常见的数据存取层名称
+Mapper     MyBatis 中负责 Java 方法与 SQL 映射的接口名称
+```
+
+它们在典型分层中都位于 Service 和数据库之间。现阶段使用 `Repository` 命名，是为了熟悉 Spring 项目的常见表达；重点仍然是理解它负责封装数据访问，而不是死记名称。

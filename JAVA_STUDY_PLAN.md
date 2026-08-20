@@ -102,16 +102,21 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 2. 第二轮使用纯注解 / Java 配置：`AnnotationConfigApplicationContext`、组件注解、`@Configuration`、`@Bean`、`@Aspect`、`@EnableAspectJAutoProxy` 和 `@Transactional`，重新实现同一组能力。
 3. 两轮代码放在不同包中，先完成 XML 轮并复盘，再开始注解轮；不能在 XML 轮提前混入注解。
 
-第一轮先使用内存 Repository 观察 IoC、DI、Bean 生命周期和代理机制；事务主线稳定后，再根据引导选择是否接入 MySQL。不要让数据库配置遮挡 Spring Core 容器本身。
+两轮先通过普通 Probe 观察 IoC、DI、Bean 生命周期和代理机制，再接入现有 MySQL，用账户转账和操作日志验证声明式事务。数据库连接配置保持外置，避免凭据进入仓库。
 
 当前详细引导维护在：
 
 ```text
 02-spring-core/README.md
 02-spring-core/docs/XML_GUIDE.md
+02-spring-core/docs/XML复盘.md
+02-spring-core/docs/ANNOTATION_GUIDE.md
+02-spring-core/docs/ANNOTATION复盘.md
 ```
 
-建议项目：账户扣款与操作日志的内存版本，加入耗时切面和事务边界；XML 轮与注解轮使用同一业务主题进行对照。测试或 Maven 命令只作为辅助确认，重点是观察容器、代理和事务行为。
+完成状态：`已完成`（2026-08-20）。XML 与注解两轮均已完成 IoC/DI、生命周期、AOP、事务提交与回滚、后置处理器和自调用代理边界验收；详细证据见 Module README 与 `LEARNING_PROGRESS.md`。
+
+实际项目：账户转账与操作日志，加入耗时切面、事务边界、后置处理器和自调用代理实验；XML 轮与注解轮使用同一业务主题进行对照。测试或 Maven 命令只作为辅助确认，重点是观察容器、代理和事务行为。
 
 验收建议：打印或断点观察 Bean 生命周期；分别验证 XML 和注解下的构造器注入；验证切面是否在目标方法前后执行；制造异常确认事务能够回滚；单独验证内部方法调用导致的代理失效场景；最后用自己的话比较两轮配置差异。
 
@@ -232,6 +237,6 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 ## 七、当前起点
 
 - Java 基础：已完成第一轮学习和两个手写项目实践。
-- Java Web + Spring：学习中，`01-java-web-basics` 已完成，`02-spring-core` 的纯 XML 配置轮已完成，下一步进入纯注解 / Java 配置轮。
-- `spring-training`：已完成 `01-java-web-basics` 的原生 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署练习，正在进入 Spring Core 的 XML/注解双轮练习。
+- Java Web + Spring：学习中，`01-java-web-basics` 和 `02-spring-core` 已完成，下一步进入 `03-spring-mvc`。
+- `spring-training`：已完成原生 Java Web 与 Spring Core 的 XML/注解双轮练习；下一阶段通过 Spring MVC 连接已掌握的 Servlet 请求链和 Spring 容器能力。
 - `linux-server`：主要由 AI 生成，当前仅作为对照阅读和代码审查对象。

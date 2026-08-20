@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Java 基础 | 已完成 | 已手写 `tank-game`、`chat-room`；当前能力与项目评价见 `CURRENT_LEVEL.md` |
 | Java Web 基础 | 已完成 | 已完成 Tomcat、MySQL、JDBC、用户注册、登录/Session/登出、Filter、Listener、留言板、事务提交/回滚/恢复、WAR 构建和部署复测；核心技术复盘已完成 |
-| Spring Core | 进行中 | `02-spring-core` 的纯 XML 配置轮已完成，复盘后进入纯注解 / Java 配置轮 |
+| Spring Core | 已完成 | `02-spring-core` 已完成 XML 与注解两轮，并通过 IoC/DI、生命周期、AOP、事务、后置处理器和自调用代理边界验收 |
 | Spring MVC | 未开始 | 待创建 `03-spring-mvc` |
 | MyBatis | 未开始 | 待创建 `04-mybatis` |
 | Spring Boot | 未开始 | 待创建 `05-spring-boot` |
@@ -19,7 +19,7 @@
 - `linux-server` 主要由 AI 生成，当前只作为阅读、审查、修改和复盘目标。
 - 尚未通过 `spring-training` 的独立 Module 证明 Spring Boot 能力。
 - Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力。
-- Spring Core 当前安排：只创建一个 `02-spring-core` Module，使用同一个账户扣款与操作日志主题，先纯 XML、后纯注解 / Java 配置；两轮放在不同包中进行对照。
+- Spring Core Module 已完成：使用同一个账户转账主题分别完成纯 XML 与纯注解 / Java 配置，两轮放在不同包中，并通过运行结果对照 BeanDefinition 来源、依赖注入、生命周期、AOP、事务和后置处理器机制。
 
 ## Module 验收记录
 
@@ -41,15 +41,21 @@
 - 主要边界：`ResultSet` 关闭不够一致；依赖仍通过手动 `new` 管理；响应和参数模型较原始；JSON 手动拼接不具备完整转义能力；Listener 计数不是并发安全实现；`web.xml` 命名空间仍需从旧 Java EE 描述符迁移到 Jakarta 6 格式。
 - 能力判断：这些问题不影响本阶段学习目标和已完成结论，但说明当前水平是“扎实的原生 Web 入门和独立动手能力”，还不是生产级 Java 后端工程能力。
 
-### 02-spring-core XML 轮记录（2026-08-19）
+### 02-spring-core 完成记录（2026-08-20）
 
-- 状态：进行中，纯 XML 轮核心练习和复盘已完成，下一步开始纯注解 / Java 配置轮。
+- 状态：已完成。
 - Module 形式：普通 Maven `jar` Module，不使用 Tomcat、Spring MVC 或 Spring Boot。
-- 练习顺序：第一轮纯 XML，第二轮纯注解 / Java 配置；XML 轮完成并复盘后才开始注解轮。
-- 当前文档：`02-spring-core/README.md` 为两轮总览，`02-spring-core/docs/XML_GUIDE.md` 为 XML 轮引导，`02-spring-core/docs/XML复盘.md` 为 XML 轮复盘。
-- 已完成证据：AOP 验收中，`invocation.proceed()` 正常时目标方法执行并打印耗时；注释后目标方法被截断；获取到 `AccountService$$SpringCGLIB$$1` 代理类；singleton 比较为 `true`、prototype 比较为 `false`；关闭容器时执行销毁回调。
-- 已完成事务证据：Navicat 中确认正常转账后两个账户余额为 `900.00`、`600.00`，并新增一条 `100.00` 日志；日志插入后主动抛出异常时，两个账户恢复为 `1000.00`、`500.00` 且日志记录回滚；删除模拟异常后再次成功提交，证明事务配置和故障恢复均正常。
-- 当前未完成：第二轮纯注解 / Java 配置实现；本 Module 尚未标记为“已完成”。
+- 练习结构：第一轮纯 XML，第二轮纯注解 / Java 配置；两轮使用相同的账户转账业务并放在独立包中，分别完成引导和复盘。
+- 当前文档：`02-spring-core/README.md` 为两轮总览和最终证据；`docs/XML_GUIDE.md`、`docs/XML复盘.md` 记录 XML 轮；`docs/ANNOTATION_GUIDE.md`、`docs/ANNOTATION复盘.md` 记录注解轮。
+- XML 容器与 AOP 证据：`ClassPathXmlApplicationContext` 完成 Bean 创建和依赖注入；`invocation.proceed()` 正常时目标方法执行并打印耗时，去掉后目标方法被截断；获取到 CGLIB 代理类；singleton/prototype 与销毁回调结果符合预期。
+- XML 事务证据：Navicat 确认正常转账后账户余额为 `900.00`、`600.00` 并新增 `100.00` 日志；日志写入后主动抛出异常时，余额恢复为 `1000.00`、`500.00` 且日志回滚；删除模拟异常后恢复提交。
+- 注解容器证据：`@Configuration`、`@ComponentScan`、`@Service`、`@Repository`、构造器注入和 `@Bean` 完成容器组装；`Environment` 正确读取 IDEA 环境变量；`@PostConstruct`、`@PreDestroy` 回调已观察。
+- 注解 AOP 与事务证据：`@Aspect`、`@Around`、`@EnableAspectJAutoProxy` 输出方法耗时；`@Transactional` 正常提交转账，主动抛出受检 `TransferException` 后账户与日志一起回滚，删除异常后恢复成功提交。
+- 后置处理器证据：`BeanDefinitionRegistryPostProcessor` 动态注册 BeanDefinition；`BeanFactoryPostProcessor` 在实例化前修改属性；`BeanPostProcessor` 在初始化前修改实例、初始化后返回 Wrapper；重复获取 singleton 得到相同最终对象。
+- 自调用边界证据：`outer -> this.inner()` 中没有独立 `inner` AOP 日志且事务状态为 `false`；从代理直接调用 `inner()` 或由另一个注入的 Service 调用时，出现 `inner` AOP 日志且事务状态为 `true`。
+- 构建证据：2026-08-20 执行 `mvn -s C:\Users\siyesummer\.m2\settings.xml clean verify`，4 个既有测试全部通过，Java Web WAR 与 Spring Core JAR 均重新生成，Reactor 中根项目、`01-java-web-basics` 和 `02-spring-core` 均为 `SUCCESS`。
+- 能力结论：已具备 Spring Core 的基础独立实践能力，能解释 XML 与注解只是 BeanDefinition 来源和注册方式不同，容器、生命周期、后置处理器、代理和事务核心机制仍然相同。
+- 当前边界：尚未通过训练项目证明 Spring MVC、Spring Boot 自动配置、复杂事务传播、连接池调优和生产级 Spring 工程设计；下一阶段进入 `03-spring-mvc`。
 
 后续每个 Module 完成后，记录以下内容：
 

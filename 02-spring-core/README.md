@@ -1,8 +1,9 @@
 # Module 02：Spring Core 两轮练习总览
 
-> 当前状态：`进行中`
-> 当前轮次：纯 XML 配置已完成，待开始纯注解 / Java 配置
-> 目标：先通过 XML 理解 Spring 容器，再用注解完成同一组能力的第二次实现和对照。
+> 当前状态：`已完成`
+> 完成日期：2026-08-20
+> 完成轮次：纯 XML 配置、纯注解 / Java 配置及两轮复盘均已完成
+> 阶段结论：能够分别使用 XML 与注解完成 Spring Core 的容器组装、生命周期、AOP、事务和后置处理器练习，并解释两种方式的共同机制与边界。
 
 ## 1. 为什么使用一个 Module
 
@@ -33,7 +34,10 @@ XML 和注解是 Spring 容器的两种配置入口，底层要理解的仍然�
 ├─ pom.xml
 ├─ README.md
 ├─ docs/
-│  └─ XML_GUIDE.md
+│  ├─ XML_GUIDE.md
+│  ├─ XML复盘.md
+│  ├─ ANNOTATION_GUIDE.md
+│  └─ ANNOTATION复盘.md
 └─ src/
    ├─ main/java/cn/siyes/training/spring/
    ├─ main/resources/
@@ -51,7 +55,7 @@ XML 和注解是 Spring 容器的两种配置入口，底层要理解的仍然�
 
 ## 3. 业务主题
 
-两轮都使用一个最小的“账户扣款与操作日志”业务：
+两轮都使用一个最小的“账户转账与操作日志”业务：
 
 ```text
 AccountService
@@ -62,16 +66,16 @@ AccountService
 IoC、DI、生命周期和 AOP 先通过最小普通 Java 对象观察；事务练习再接入已有 MySQL 环境，模拟：
 
 ```text
-扣减账户余额 + 写入操作日志
+扣减转出账户余额 + 增加转入账户余额 + 写入操作日志
 ```
 
-两步必须作为一个事务成功；第二步失败时，第一步也要回滚。
+三步必须作为一个事务成功；任一步失败时，前面尚未提交的修改都要回滚。
 
 ## 4. 两轮练习安排
 
 ### 第一轮：纯 XML
 
-详细步骤见 [XML_GUIDE.md](docs/XML_GUIDE.md)。
+详细步骤见 [XML_GUIDE.md](docs/XML_GUIDE.md)。XML 轮复盘见 [XML复盘.md](docs/XML复盘.md)。
 
 XML 轮只使用：
 
@@ -100,7 +104,9 @@ XML 轮暂时禁止在业务类上使用：
 
 ### 第二轮：纯注解 / Java 配置
 
-XML 轮完成并复盘后，再开始第二轮。第二轮使用：
+XML 轮完成并复盘后，第二轮使用：
+
+详细步骤见 [ANNOTATION_GUIDE.md](docs/ANNOTATION_GUIDE.md)。
 
 - `AnnotationConfigApplicationContext`。
 - `@Component`、`@Service`、`@Repository`。
@@ -169,3 +175,30 @@ Spring 容器扫描注解 / 读取 Java 配置
 ```
 
 这条对照关系是本 Module 最重要的学习主线。
+
+## 8. 本阶段完成情况
+
+- 完成日期：2026-08-20。
+- Module 形式：普通 Maven `jar`，不依赖 Tomcat、Spring MVC 或 Spring Boot。
+- 独立实现：XML 与注解两套 AccountService、Repository、JdbcTemplate、AOP、声明式事务、生命周期 Probe 和后置处理器练习。
+- 配置方式：XML 轮使用 `ClassPathXmlApplicationContext`、`<bean>`、XML AOP 和事务 Advisor；注解轮使用 `AnnotationConfigApplicationContext`、组件扫描、`@Bean`、`@Aspect` 和 `@Transactional`。
+- 数据链路：Service 组合扣款、入账和转账日志写入，Repository 通过 `JdbcTemplate` 访问 MySQL，事务边界位于 Service。
+- 后置处理器：实际验证 `BeanDefinitionRegistryPostProcessor` 动态注册定义、`BeanFactoryPostProcessor` 修改定义，以及 `BeanPostProcessor` 修改和包装实例。
+- 代理边界：实际验证外部调用经过 AOP/事务代理，`this.inner()` 自调用绕过代理，拆分到另一个注入的 Service 后重新经过代理。
+
+### 8.1 核心验收证据
+
+- XML AOP：目标方法正常执行并输出耗时；去掉 `invocation.proceed()` 后目标方法被截断；获取到 CGLIB 代理类型。
+- XML 事务：正常转账后余额为 `900.00`、`600.00` 并新增 `100.00` 日志；日志写入后主动抛出异常时余额恢复为 `1000.00`、`500.00` 且日志回滚；删除模拟异常后恢复成功提交。
+- 注解生命周期：控制台观察到 `@PostConstruct` 和 `@PreDestroy` 回调。
+- 注解 AOP：`transfer`、`outer`、`inner` 和 `callInner` 的耗时日志符合切点与代理入口预期。
+- 注解事务：正常转账成功提交；日志写入后主动抛出受检 `TransferException` 时，账户和日志一起回滚；删除模拟异常后恢复提交。
+- 自调用边界：`outer -> this.inner()` 中事务状态为 `false` 且没有独立 `inner` AOP 日志；从代理直接调用或通过另一个 Service 调用时事务状态为 `true`，并输出 `inner` AOP 日志。
+- 后置处理器：动态 BeanDefinition 注册成功；定义属性在实例化前被修改；初始化后返回 Wrapper；两次获取 singleton 得到同一最终对象。
+- 构建证据：2026-08-20 执行 `mvn -s C:\Users\siyesummer\.m2\settings.xml clean verify`，4 个既有测试全部通过，Java Web WAR 与 Spring Core JAR 均重新生成，Reactor 中三个项目均为 `SUCCESS`。
+
+### 8.2 能力结论与边界
+
+本阶段能够证明已具备 Spring Core 的基础独立实践能力：能手写最小容器配置，理解 BeanDefinition、Bean 实例与代理对象的区别，并能解释依赖注入、生命周期、AOP 和声明式事务的基本调用链。
+
+本阶段不证明已经掌握 Spring MVC、Spring Boot 自动配置、连接池调优、复杂事务传播、循环依赖或生产级 Spring 工程设计。下一阶段进入 `03-spring-mvc`，重点理解 `DispatcherServlet`、Controller、参数绑定、JSON 转换、校验和统一异常处理。

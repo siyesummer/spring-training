@@ -51,6 +51,12 @@
             <artifactId>aspectjweaver</artifactId>
             <version>${aspectj.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
         <!-- 第二阶段的可重复验证使用；不是业务运行依赖 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

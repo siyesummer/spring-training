@@ -1,20 +1,20 @@
 # 当前 Java 能力基线
 
-> 评估日期：2026-08-19
-> 评估依据：用户手写的 `tank-game`、`chat-room`，以及 `01-java-web-basics` 中独立完成的 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和 Tomcat 部署实践。
+> 评估日期：2026-08-20
+> 评估依据：用户手写的 `tank-game`、`chat-room`，`01-java-web-basics` 中独立完成的原生 Java Web 实践，以及 `02-spring-core` 中完成的 XML/注解双轮 IoC、DI、生命周期、AOP、事务和后置处理器实践。
 > `linux-server` 主要由 AI 生成，只作为阅读和审查对象，不计入用户独立编码能力。
 
 ## 一、当前阶段定位
 
 当前水平可以判断为：
 
-> 已完成 Java 基础和 Java Web 基础 Module 的实践闭环，能够独立完成一个包含 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署的原生 Java Web 小服务；当前进入 Spring Core，准备通过 XML 和注解两轮练习理解框架设计和工程边界。
+> 已完成 Java 基础、Java Web 基础和 Spring Core Module 的实践闭环；能够独立完成原生 Java Web 小服务，并能分别使用 XML 与注解 / Java 配置完成 Spring 容器组装、生命周期、AOP、声明式事务和后置处理器的最小实现。当前准备进入 Spring MVC，把 Servlet 请求链与 Spring 容器能力连接起来。
 
 这意味着：
 
 - 已经越过只会语法、控制台小题和单文件练习的阶段。
-- 具备继续学习 Java Web、Spring、Spring MVC 和 MyBatis 的基础。
-- 目前具备的是“能够独立完成和解释学习型 Java Web 服务”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
+- 具备继续学习 Spring MVC、MyBatis 和 Spring Boot 的基础。
+- 目前具备的是“能够独立完成和解释学习型 Java Web 服务及 Spring Core 最小项目”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
 - Spring Boot 能力尚未通过独立手写项目和系统验收得到证明。
 
 ## 二、已有能力与代码证据
@@ -132,14 +132,43 @@
 
 综合评价：你已经达到“能够独立手写并解释原生 Java Web 基础项目”的阶段，具备进入 Spring Core 的条件。当前最重要的提升方向不是继续堆 Servlet API，而是理解 Spring 如何用 IoC、DI、Bean 生命周期、代理和 AOP 管理并抽象这些手动代码。
 
-### 2.7 阶段能力定位
+### 2.7 `02-spring-core` 代码能力评价
+
+本 Module 的 XML 与注解两轮代码能够证明以下能力已经从“看过概念”进入“亲手实现并运行”：
+
+- 能分别使用 `ClassPathXmlApplicationContext` 和 `AnnotationConfigApplicationContext` 启动 Spring 容器。
+- 能通过 XML `<bean>`、组件扫描和 `@Bean` 形成 BeanDefinition，并使用构造器或 Setter 完成依赖注入。
+- 能区分 BeanDefinition、目标对象和代理对象，理解 `getBean()` 可能返回代理或包装对象。
+- 能通过 XML AOP 和 `@Aspect` / `@Around` 创建耗时切面，并解释 `proceed()` 决定是否继续调用目标方法。
+- 能通过 XML 事务配置和 `@Transactional` 完成正常提交与异常回滚，理解事务管理器与 `JdbcTemplate` 共享事务 Connection 的关系。
+- 能手写 `BeanDefinitionRegistryPostProcessor`、`BeanFactoryPostProcessor` 和 `BeanPostProcessor`，解释定义层修改、实例层处理和最终 Wrapper 的差异。
+- 能通过事务状态与 AOP 日志证明 `this` 自调用绕过代理，并通过拆分到另一个注入的 Service 重新进入代理。
+
+代码和复盘体现出的主要优点：
+
+- 没有停留在背诵注解，而是使用相同业务分别实现 XML 与注解配置，能比较两种 BeanDefinition 来源。
+- 通过正常提交、主动异常回滚和删除异常后的恢复提交，实际验证了声明式事务边界。
+- 能根据运行现象修正 `@Configurable` / `@Configuration`、JDBC URL、余额判断和金额校验等问题。
+- 能将后置处理器与 AOP 自动代理创建联系起来，开始从容器扩展机制而不是 API 清单理解 Spring。
+
+当前边界：
+
+- 目前使用的是学习型 `DriverManagerDataSource`，尚未证明连接池配置和生产级数据源管理能力。
+- 已理解 `REQUIRED`、`READ_COMMITTED` 和 `rollbackFor` 的当前用法，但复杂传播行为、隔离异常和并发事务尚未系统验证。
+- 后置处理器练习能够说明扩展点时机，但尚未涉及循环依赖、早期代理或复杂处理器排序。
+- 尚未进入 Spring MVC、Spring Boot 自动配置和真实 Web 层框架整合。
+
+综合评价：已具备 Spring Core 的基础独立实践能力，能够写出并解释最小 IoC、DI、生命周期、AOP 和事务实现。能力定位仍是学习型项目的扎实基础，不等同于生产级 Spring 工程经验。
+
+### 2.8 阶段能力定位
 
 | 能力层级 | 当前判断 | 依据 |
 | --- | --- | --- |
 | Java 基础与项目动手 | 已具备 | 独立手写 `tank-game`、`chat-room`，并能持续修改和运行项目 |
 | 原生 Java Web 基础 | 已具备入门到初级独立实践能力 | `01-java-web-basics` 完成 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署 |
 | Java Web 工程化 | 初步具备 | 已有 Maven、环境变量、日志、测试和部署意识，但抽象、并发和统一响应仍较原始 |
-| Spring / Spring Boot | 尚未证明 | 还没有在训练项目中独立实现 IoC、DI、AOP、Spring MVC 或 Boot 自动配置 |
+| Spring Core | 已具备基础独立实践能力 | `02-spring-core` 完成 XML/注解双轮 IoC、DI、生命周期、AOP、事务、后置处理器与自调用边界 |
+| Spring MVC / Spring Boot | 尚未证明 | 尚未在训练项目中独立实现 Spring MVC 请求链或 Spring Boot 自动配置 |
 | 生产级后端设计 | 尚未证明 | 尚未系统验证并发、连接池、统一错误模型、数据一致性、可观测性和安全边界 |
 
 ## 三、两个手写项目的客观评价
@@ -190,7 +219,7 @@
 下面这些内容不能因为看过课程、运行过 AI 生成项目或使用过相关注解，就判断为已掌握：
 
 - Spring Web 体系中的更高层请求处理和框架封装边界。
-- Spring IoC 容器、Bean 生命周期、代理、AOP 和事务传播。
+- Spring AOP 的复杂 Advisor 排序、循环依赖代理和声明式事务的复杂传播组合。
 - Spring MVC 的 `DispatcherServlet` 调用链、参数绑定、校验和异常处理。
 - MyBatis Mapper、动态 SQL、结果映射和 Spring 事务整合。
 - Spring Boot 自动配置、Starter、Profile、配置绑定和测试体系。
@@ -198,11 +227,11 @@
 - Web 层测试、数据库集成测试和并发测试。
 - 复杂业务下的表结构、索引、幂等、并发和事务设计。
 
-这些内容仍未被本 Module 证明：
+这些内容仍未被当前已完成的 Module 证明：
 
 - 生产级线程安全、连接池使用、统一 JSON 序列化和全局异常处理。
 - 复杂并发下的 Session、事务隔离、幂等和一致性设计。
-- 通过框架完成可维护的依赖注入、配置绑定和模块化测试。
+- Spring MVC / Spring Boot 环境下的配置绑定、Web 层整合和模块化测试。
 
 这些能力将通过 `JAVA_STUDY_PLAN.md` 中的 Module 逐项验证。
 
@@ -226,23 +255,23 @@
 
 ## 六、下一阶段判断标准
 
-当前正在进入 `02-spring-core`。`01-java-web-basics` 已证明能够：
+当前准备进入 `03-spring-mvc`。`01-java-web-basics` 和 `02-spring-core` 已证明能够：
 
-- 独立解释一次 HTTP 请求进入 Tomcat、经过 Filter、到达 Servlet 并返回响应的过程。
-- 使用 Servlet 完成参数获取、JSON 或页面响应、Cookie、Session 和登录拦截。
-- 使用 JDBC + `PreparedStatement` 完成数据库操作。
-- 明确事务提交与回滚边界。
-- 使用 Maven 构建标准 Java Web 项目，并将 WAR 部署到 Tomcat。
-- 通过 Listener 观察 Web 应用和 Session 生命周期回调。
-- 使用手动请求和运行日志完成核心功能验收；自动化测试作为辅助能力理解。
+- 解释浏览器请求进入 Tomcat、经过 Filter、到达 Servlet 并返回响应的原生链路。
+- 使用 Servlet、Session、JDBC 和事务完成学习型 Web 服务。
+- 使用 Spring 容器创建、注入和管理对象，并观察生命周期回调。
+- 使用 AOP 和声明式事务代理处理横切逻辑与事务边界。
+- 区分 BeanDefinition、目标对象、代理对象，以及理解自调用绕过代理。
 
 下一阶段需要重点证明：
 
-- Spring IoC 容器如何创建、管理和注入对象。
-- Bean 生命周期、配置、代理和 AOP 的基本机制。
-- Spring 声明式事务与原生 JDBC 事务边界之间的关系。
+- `DispatcherServlet` 如何接收请求并找到 Controller。
+- HandlerMapping、HandlerAdapter、参数解析器和消息转换器分别承担什么职责。
+- `@RequestMapping`、`@PathVariable`、`@RequestParam` 和 `@RequestBody` 如何完成路由与参数绑定。
+- Java 对象如何通过消息转换器序列化为 JSON，前端 JSON 如何反序列化为 Java 对象。
+- 参数校验、统一异常处理、状态码和跨域配置如何进入完整请求链。
 
-本阶段采用一个 Module 分两轮的方式：先纯 XML，再纯注解 / Java 配置。两轮使用同一业务主题，分别观察 Bean 定义来源变化对 IoC、DI、AOP 和事务代理的影响。
+`03-spring-mvc` 仍应优先理解框架请求链和 Servlet 的对应关系，再考虑是否使用 Spring Boot 提供启动便利；不能把 Boot 自动配置误认为 Spring MVC 本身。
 
 ## 七、能力基线更新规则
 
