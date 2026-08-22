@@ -9,7 +9,7 @@
 | Java 基础 | 已完成 | 已手写 `tank-game`、`chat-room`；当前能力与项目评价见 `CURRENT_LEVEL.md` |
 | Java Web 基础 | 已完成 | 已完成 Tomcat、MySQL、JDBC、用户注册、登录/Session/登出、Filter、Listener、留言板、事务提交/回滚/恢复、WAR 构建和部署复测；核心技术复盘已完成 |
 | Spring Core | 已完成 | `02-spring-core` 已完成 XML 与注解两轮，并通过 IoC/DI、生命周期、AOP、事务、后置处理器和自调用代理边界验收 |
-| Spring MVC | 未开始 | 待创建 `03-spring-mvc` |
+| Spring MVC | 已完成 | 已完成传统 WAR + Tomcat 下的 `DispatcherServlet`、任务 REST API、四类参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 持久化验收 |
 | MyBatis | 未开始 | 待创建 `04-mybatis` |
 | Spring Boot | 未开始 | 待创建 `05-spring-boot` |
 | Spring Boot 综合项目 | 未开始 | 待创建 `06-spring-boot-comprehensive` |
@@ -20,6 +20,7 @@
 - 尚未通过 `spring-training` 的独立 Module 证明 Spring Boot 能力。
 - Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力。
 - Spring Core Module 已完成：使用同一个账户转账主题分别完成纯 XML 与纯注解 / Java 配置，两轮放在不同包中，并通过运行结果对照 BeanDefinition 来源、依赖注入、生命周期、AOP、事务和后置处理器机制。
+- Spring MVC Module 已完成：不依赖 Spring Boot，手动注册 `DispatcherServlet` 并完成 MySQL 任务管理 REST API；真实请求、数据库结果、Interceptor 日志、复盘和 WAR 构建均已形成验收证据。
 
 ## Module 验收记录
 
@@ -56,6 +57,21 @@
 - 构建证据：2026-08-20 执行 `mvn -s C:\Users\siyesummer\.m2\settings.xml clean verify`，4 个既有测试全部通过，Java Web WAR 与 Spring Core JAR 均重新生成，Reactor 中根项目、`01-java-web-basics` 和 `02-spring-core` 均为 `SUCCESS`。
 - 能力结论：已具备 Spring Core 的基础独立实践能力，能解释 XML 与注解只是 BeanDefinition 来源和注册方式不同，容器、生命周期、后置处理器、代理和事务核心机制仍然相同。
 - 当前边界：尚未通过训练项目证明 Spring MVC、Spring Boot 自动配置、复杂事务传播、连接池调优和生产级 Spring 工程设计；下一阶段进入 `03-spring-mvc`。
+
+### 03-spring-mvc 完成记录（2026-08-22）
+
+- 状态：已完成。
+- Module 形式：传统 Maven `war` Module，部署到 Tomcat 10.1；不使用 Spring Boot，手动注册 `DispatcherServlet`。
+- 练习主题：MySQL 任务管理 REST API；本阶段沿用已掌握的 `JdbcTemplate` 完成真实持久化，`04-mybatis` 再替换 Repository 实现，避免把 MyBatis 提前混入 MVC 主线。
+- 引导范围：路由、四种参数来源、JSON 消息转换、DTO、Bean Validation、统一异常处理、HTTP 状态码、Interceptor、CORS 和完整请求链。
+- 当前文档：`03-spring-mvc/README.md`、`docs/SPRING_MVC_GUIDE.md`、`docs/SPRING_MVC_CONTEXT_HIERARCHY.md` 与 `docs/SPRING_MVC复盘.md`。
+- 功能证据：Apifox 验证创建任务返回真实 HTTP `201`，按 ID 查询、关键字与状态筛选分页、基本信息修改、状态修改和删除均可用；分页总数来自独立 `COUNT(*)`；Java 时间类型输出 ISO 字符串。
+- 数据证据：Navicat 确认任务新增、状态更新和删除结果与接口一致；任务清空后重新创建并复测，数据链路正常。
+- 校验与异常证据：空标题经 `@Valid` / Bean Validation 返回真实 HTTP `400`；不存在任务由 Service 抛出 `TaskNotFoundException`，经 `@RestControllerAdvice` 返回稳定的 `404 JSON`；兜底处理器返回固定 `500` 信息。
+- Interceptor 证据：Tomcat 控制台打印 `HandlerMethod`、`TaskController`、`queryById` 和 `afterCompletion 200`，证明请求在匹配 Handler 后进入 MVC Interceptor，并观察到最终状态。
+- 构建证据：2026-08-22 执行 `mvn -s C:\Users\siyesummer\.m2\settings.xml -pl 03-spring-mvc -am clean package -DskipTests`，根项目和 `03-spring-mvc` 均为 `SUCCESS`，20 个主源码文件编译成功并生成 `target/03-spring-mvc.war`。
+- 能力结论：已达到“能够独立完成并解释最小 Spring MVC REST API”的阶段，能说明 Servlet 容器、`DispatcherServlet`、HandlerMapping、Interceptor、HandlerAdapter、参数解析、校验、Controller、返回值处理和消息转换的主要关系，具备进入 `04-mybatis` 的条件。
+- 当前边界：尚未证明 Spring MVC 内部源码、复杂内容协商、自定义参数解析器、生产级 API 安全与可观测性、Spring Boot 自动配置和完整 Web 集成测试能力。
 
 后续每个 Module 完成后，记录以下内容：
 

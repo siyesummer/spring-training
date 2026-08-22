@@ -12,6 +12,7 @@
   <modules>
     <module>01-java-web-basics</module>
     <module>02-spring-core</module>
+    <module>03-spring-mvc</module>
   </modules>
 
   <properties>
@@ -19,6 +20,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <mysql.connector.version>8.0.33</mysql.connector.version>
     <junit.jupiter.version>5.10.3</junit.jupiter.version>
+    <spring.version>6.2.8</spring.version>
   </properties>
 
   <dependencyManagement>
@@ -32,6 +34,13 @@
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>${junit.jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

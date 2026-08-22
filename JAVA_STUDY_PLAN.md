@@ -122,6 +122,8 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 
 ### 4.3 `03-spring-mvc`
 
+完成状态：`已完成`（2026-08-22）。传统 Maven WAR 已部署到 Tomcat 10.1；使用 `web.xml` 显式注册 `DispatcherServlet`，Java 配置类启用 MVC，不使用 Spring Boot。已手写 MySQL 任务管理 REST API，并用 `JdbcTemplate` 完成真实持久化；`04-mybatis` 将继续围绕数据访问层练习 Mapper 与动态 SQL。
+
 必须掌握：
 
 - `DispatcherServlet`、HandlerMapping、Controller、参数解析和消息转换器。
@@ -135,6 +137,8 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 建议项目：任务管理 API，至少包含任务增删改查、分页、状态过滤、参数校验和统一异常响应。
 
 验收建议：使用 MockMvc 或 HTTP 客户端覆盖成功请求、缺少参数、类型错误、校验失败、业务异常和未知异常；确认响应状态码和响应体格式稳定。
+
+验收结果：Apifox 已验证创建 `201`、查询与分页 `200`、更新、状态修改、删除、DTO 校验 `400` 和任务不存在 `404`；Navicat 已确认数据库结果；Interceptor 已打印 `TaskController.queryById` 和最终状态；复盘能够说明 HandlerMapping、HandlerAdapter、参数解析器、消息转换器、校验与异常处理链。2026-08-22 执行 Module Maven 构建成功并生成 WAR，详细证据见 `03-spring-mvc/README.md` 与 `LEARNING_PROGRESS.md`。
 
 ### 4.4 `04-mybatis`
 
@@ -237,6 +241,6 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 ## 七、当前起点
 
 - Java 基础：已完成第一轮学习和两个手写项目实践。
-- Java Web + Spring：学习中，`01-java-web-basics` 和 `02-spring-core` 已完成，下一步进入 `03-spring-mvc`。
-- `spring-training`：已完成原生 Java Web 与 Spring Core 的 XML/注解双轮练习；下一阶段通过 Spring MVC 连接已掌握的 Servlet 请求链和 Spring 容器能力。
+- Java Web + Spring：学习中，`01-java-web-basics`、`02-spring-core` 和 `03-spring-mvc` 已完成，下一步进入 `04-mybatis`。
+- `spring-training`：已完成原生 Java Web、Spring Core 和 Spring MVC 阶段练习；下一阶段学习 MyBatis，继续补全数据访问层能力。
 - `linux-server`：主要由 AI 生成，当前仅作为对照阅读和代码审查对象。

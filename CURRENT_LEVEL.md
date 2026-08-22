@@ -1,20 +1,20 @@
 # 当前 Java 能力基线
 
-> 评估日期：2026-08-20
-> 评估依据：用户手写的 `tank-game`、`chat-room`，`01-java-web-basics` 中独立完成的原生 Java Web 实践，以及 `02-spring-core` 中完成的 XML/注解双轮 IoC、DI、生命周期、AOP、事务和后置处理器实践。
+> 评估日期：2026-08-22
+> 评估依据：用户手写的 `tank-game`、`chat-room`，`01-java-web-basics` 中独立完成的原生 Java Web 实践，`02-spring-core` 中完成的 XML/注解双轮 IoC、DI、生命周期、AOP、事务和后置处理器实践，以及 `03-spring-mvc` 中独立完成的传统 WAR 任务 REST API、真实 HTTP/数据库验收和机制复盘。
 > `linux-server` 主要由 AI 生成，只作为阅读和审查对象，不计入用户独立编码能力。
 
 ## 一、当前阶段定位
 
 当前水平可以判断为：
 
-> 已完成 Java 基础、Java Web 基础和 Spring Core Module 的实践闭环；能够独立完成原生 Java Web 小服务，并能分别使用 XML 与注解 / Java 配置完成 Spring 容器组装、生命周期、AOP、声明式事务和后置处理器的最小实现。当前准备进入 Spring MVC，把 Servlet 请求链与 Spring 容器能力连接起来。
+> 已完成 Java 基础、Java Web 基础、Spring Core 和 Spring MVC Module 的实践闭环；能够独立完成原生 Java Web 小服务、Spring Core 最小容器练习，以及传统 WAR + Tomcat 下的 Spring MVC REST API。当前准备进入 MyBatis，重点补足 Mapper、动态 SQL 和结果映射能力。
 
 这意味着：
 
 - 已经越过只会语法、控制台小题和单文件练习的阶段。
-- 具备继续学习 Spring MVC、MyBatis 和 Spring Boot 的基础。
-- 目前具备的是“能够独立完成和解释学习型 Java Web 服务及 Spring Core 最小项目”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
+- 具备继续学习 MyBatis 和 Spring Boot 的基础。
+- 目前具备的是“能够独立完成和解释学习型 Java Web、Spring Core 与 Spring MVC 最小项目”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
 - Spring Boot 能力尚未通过独立手写项目和系统验收得到证明。
 
 ## 二、已有能力与代码证据
@@ -156,11 +156,41 @@
 - 目前使用的是学习型 `DriverManagerDataSource`，尚未证明连接池配置和生产级数据源管理能力。
 - 已理解 `REQUIRED`、`READ_COMMITTED` 和 `rollbackFor` 的当前用法，但复杂传播行为、隔离异常和并发事务尚未系统验证。
 - 后置处理器练习能够说明扩展点时机，但尚未涉及循环依赖、早期代理或复杂处理器排序。
-- 尚未进入 Spring MVC、Spring Boot 自动配置和真实 Web 层框架整合。
+- Spring Core 练习本身不覆盖 Web 层；Spring MVC 能力已由后续 `03-spring-mvc` 单独完成验证，Spring Boot 自动配置仍未进入。
 
 综合评价：已具备 Spring Core 的基础独立实践能力，能够写出并解释最小 IoC、DI、生命周期、AOP 和事务实现。能力定位仍是学习型项目的扎实基础，不等同于生产级 Spring 工程经验。
 
-### 2.8 阶段能力定位
+### 2.8 `03-spring-mvc` 代码能力评价
+
+本 Module 的传统 WAR 任务管理 API 能够证明以下能力已经从“看过概念”进入“亲手实现并运行”：
+
+- 能通过 `web.xml` 在 Tomcat 10.1 中显式注册 `DispatcherServlet`，使用 `@EnableWebMvc`、组件扫描和 Java 配置启用 MVC 基础设施。
+- 能使用 `@PathVariable`、`@RequestParam`、`@ModelAttribute` 和 `@RequestBody` 接收不同来源的参数，并解释各自的数据来源。
+- 能借助 Jackson 完成 JSON 与 DTO 的双向转换，理解请求反序列化发生在 Controller 前、响应序列化发生在 Controller 返回后。
+- 能使用 Bean Validation 与 `@Valid` 阻止非法请求进入 Controller，并区分校验失败与 JSON/枚举反序列化失败。
+- 能使用 `@RestControllerAdvice`、`@ExceptionHandler` 和 `ResponseEntity` 将业务异常转换成真实 HTTP `400`、`404`、`500` 与统一 JSON 响应。
+- 能完成任务创建、查询、筛选分页、修改、状态修改和删除，并通过 HikariCP、`JdbcTemplate`、Repository 与 MySQL 形成完整持久化链路。
+- 能通过 `HandlerMethod` 和 Interceptor 日志观察具体 Controller 方法及最终响应状态，并说明 Filter、DispatcherServlet、Interceptor 和 Controller 的位置关系。
+- 能解释 HandlerMapping 负责“找到谁”、HandlerAdapter 负责“怎样调用”，并将参数解析器、返回值处理器和消息转换器放入完整请求链。
+
+代码和复盘体现出的主要优点：
+
+- 没有使用 Spring Boot 隐藏启动过程，能够将 Servlet 入口、Spring Core Bean 管理和 Spring MVC 请求处理连接起来。
+- DTO、Controller、Service、Repository 的职责边界已经基本形成；Service 依赖 `TaskRepository` 接口，为下一阶段替换 MyBatis 数据访问实现保留了边界。
+- 不只验证成功 CRUD，还实际处理了 JDBC URL、JSON 构造、`@RequestBody`、JavaBean 序列化、枚举写库、分页总数、校验异常和业务 `404` 等问题。
+- 使用 Apifox、Navicat、Tomcat 日志和复盘交叉验证代码行为，已经具备从 HTTP 现象追踪到框架层和数据层的初步排查能力。
+
+当前边界：
+
+- 对 HandlerMapping、HandlerAdapter、参数解析器和返回值处理器的理解达到调用链层面，尚未进入 Spring MVC 内部源码和自定义扩展实现。
+- CORS 已完成配置，但尚未通过独立浏览器前端应用系统验证预检、凭据和多环境来源管理。
+- 当前分页、统一响应、日志和异常模型适合训练项目，尚未覆盖生产级幂等、安全、权限、审计、可观测性和接口版本治理。
+- HikariCP 已完成基础连接池使用，但连接池容量、超时、故障恢复和并发压力没有经过生产级验证。
+- 自动化 Web/数据库集成测试不是本阶段重点，尚未形成 MockMvc 与数据库测试体系。
+
+综合评价：已具备 Spring MVC 的基础独立实践能力，能够手写并解释最小 REST API 及其主要请求链。能力定位仍是学习型单体 Web 服务的扎实基础，不等同于 Spring MVC 源码能力或生产级后端设计经验。
+
+### 2.9 阶段能力定位
 
 | 能力层级 | 当前判断 | 依据 |
 | --- | --- | --- |
@@ -168,7 +198,8 @@
 | 原生 Java Web 基础 | 已具备入门到初级独立实践能力 | `01-java-web-basics` 完成 Servlet、Filter、Listener、Session、JDBC、事务和 WAR 部署 |
 | Java Web 工程化 | 初步具备 | 已有 Maven、环境变量、日志、测试和部署意识，但抽象、并发和统一响应仍较原始 |
 | Spring Core | 已具备基础独立实践能力 | `02-spring-core` 完成 XML/注解双轮 IoC、DI、生命周期、AOP、事务、后置处理器与自调用边界 |
-| Spring MVC / Spring Boot | 尚未证明 | 尚未在训练项目中独立实现 Spring MVC 请求链或 Spring Boot 自动配置 |
+| Spring MVC | 已具备基础独立实践能力 | `03-spring-mvc` 完成传统 WAR 请求链、REST CRUD、参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 验收 |
+| Spring Boot | 尚未证明 | 尚未通过独立训练 Module 证明自动配置、Starter、配置绑定、Profile 和可执行 JAR 能力 |
 | 生产级后端设计 | 尚未证明 | 尚未系统验证并发、连接池、统一错误模型、数据一致性、可观测性和安全边界 |
 
 ## 三、两个手写项目的客观评价
@@ -218,20 +249,19 @@
 
 下面这些内容不能因为看过课程、运行过 AI 生成项目或使用过相关注解，就判断为已掌握：
 
-- Spring Web 体系中的更高层请求处理和框架封装边界。
+- Spring MVC 内部源码、自定义参数解析器/消息转换器、复杂内容协商和异步请求处理。
 - Spring AOP 的复杂 Advisor 排序、循环依赖代理和声明式事务的复杂传播组合。
-- Spring MVC 的 `DispatcherServlet` 调用链、参数绑定、校验和异常处理。
 - MyBatis Mapper、动态 SQL、结果映射和 Spring 事务整合。
 - Spring Boot 自动配置、Starter、Profile、配置绑定和测试体系。
-- REST API 设计、状态码、幂等、分页和统一错误响应。
+- 生产级 REST API 的幂等、安全、接口版本、复杂分页和错误模型治理。
 - Web 层测试、数据库集成测试和并发测试。
 - 复杂业务下的表结构、索引、幂等、并发和事务设计。
 
 这些内容仍未被当前已完成的 Module 证明：
 
-- 生产级线程安全、连接池使用、统一 JSON 序列化和全局异常处理。
+- 生产级线程安全、连接池调优、统一 JSON/错误模型治理和敏感信息日志控制。
 - 复杂并发下的 Session、事务隔离、幂等和一致性设计。
-- Spring MVC / Spring Boot 环境下的配置绑定、Web 层整合和模块化测试。
+- Spring Boot 环境下的自动配置、配置绑定、Web 层整合和模块化测试。
 
 这些能力将通过 `JAVA_STUDY_PLAN.md` 中的 Module 逐项验证。
 
@@ -255,23 +285,26 @@
 
 ## 六、下一阶段判断标准
 
-当前准备进入 `03-spring-mvc`。`01-java-web-basics` 和 `02-spring-core` 已证明能够：
+当前准备进入 `04-mybatis`。前三个 Module 已证明能够：
 
 - 解释浏览器请求进入 Tomcat、经过 Filter、到达 Servlet 并返回响应的原生链路。
 - 使用 Servlet、Session、JDBC 和事务完成学习型 Web 服务。
 - 使用 Spring 容器创建、注入和管理对象，并观察生命周期回调。
 - 使用 AOP 和声明式事务代理处理横切逻辑与事务边界。
 - 区分 BeanDefinition、目标对象、代理对象，以及理解自调用绕过代理。
+- 通过 `DispatcherServlet`、HandlerMapping、Interceptor 和 HandlerAdapter 将请求路由到 Controller。
+- 使用四种主要参数来源、Jackson、Bean Validation 和全局异常处理完成 REST API 请求与响应。
+- 通过 HikariCP、`JdbcTemplate` 和 Repository 接口完成 MySQL CRUD、筛选与分页。
 
 下一阶段需要重点证明：
 
-- `DispatcherServlet` 如何接收请求并找到 Controller。
-- HandlerMapping、HandlerAdapter、参数解析器和消息转换器分别承担什么职责。
-- `@RequestMapping`、`@PathVariable`、`@RequestParam` 和 `@RequestBody` 如何完成路由与参数绑定。
-- Java 对象如何通过消息转换器序列化为 JSON，前端 JSON 如何反序列化为 Java 对象。
-- 参数校验、统一异常处理、状态码和跨域配置如何进入完整请求链。
+- MyBatis 如何创建 Mapper 代理，以及 Mapper 接口为什么没有手写实现类也能被调用。
+- XML 与注解两种 SQL 映射方式、参数绑定、结果映射和 `#{}` / `${}` 的安全边界。
+- 动态 SQL 如何表达筛选条件，怎样避免将用户输入直接拼接为 SQL 结构。
+- 数据库字段、Java 模型、请求 DTO、响应 DTO 和 Mapper 返回对象之间如何转换。
+- 如何在保持 Controller 和大部分 Service 稳定的前提下，用 MyBatis 替换当前 `JdbcTaskRepository`。
 
-`03-spring-mvc` 仍应优先理解框架请求链和 Servlet 的对应关系，再考虑是否使用 Spring Boot 提供启动便利；不能把 Boot 自动配置误认为 Spring MVC 本身。
+`04-mybatis` 应继续保留当前 Spring MVC 请求层，把学习重点集中在数据访问实现和对象映射；不能因为 Mapper 代理减少了 JDBC 样板代码，就跳过 SQL、事务和数据库边界的理解。
 
 ## 七、能力基线更新规则
 

@@ -21,6 +21,8 @@
 7. [使用 IDEA 启动 Tomcat 时，JDBC 环境变量在哪里配置？](#7-使用-idea-启动-tomcat-时jdbc-环境变量在哪里配置)
 8. [JSP 页面放在 WEB-INF 下，为什么访问页面会 404？](#8-jsp-页面放在-web-inf-下为什么访问页面会-404)
 29. [Spring 中的 Repository 是否相当于 Java Web 中的 DAO？](#29-spring-中的-repository-是否相当于-java-web-中的-dao)
+30. [Java Web 一定要用 Tomcat 启动吗，Nginx 可以吗？](#30-java-web-一定要用-tomcat-启动吗nginx-可以吗)
+31. [现代 Java 接口服务底层都是 Java Web 或 Spring MVC 吗？](#31-现代-java-接口服务底层都是-java-web-或-spring-mvc-吗)
 
 ## 1. 现代前后端分离项目的 Java 后端一般都使用 Spring MVC 提供接口吗？
 
@@ -872,3 +874,555 @@ Mapper     MyBatis 中负责 Java 方法与 SQL 映射的接口名称
 ```
 
 它们在典型分层中都位于 Service 和数据库之间。现阶段使用 `Repository` 命名，是为了熟悉 Spring 项目的常见表达；重点仍然是理解它负责封装数据访问，而不是死记名称。
+
+## 30. Java Web 一定要用 Tomcat 启动吗，Nginx 可以吗？
+
+**简短结论：Java 后端不一定使用 Tomcat；但基于 Servlet 开发的应用必须运行在实现 Servlet 规范的容器中。Nginx 不是 Servlet 容器，不能直接运行 Servlet 或部署 WAR。**
+
+Tomcat 同时承担了两部分职责：
+
+```text
+Web 服务器能力
+  -> 监听端口
+  -> 接收和返回 HTTP 请求
+
+Servlet 容器能力
+  -> 读取 web.xml 或扫描 Servlet 注解
+  -> 创建 Servlet、Filter、Listener
+  -> 管理它们的生命周期
+  -> 创建 HttpServletRequest / HttpServletResponse
+  -> 根据 URL 映射调用相应 Servlet
+```
+
+当前 `01-java-web-basics` 使用了 Servlet、Filter、Listener 和 JSP，因此必须交给兼容 Jakarta Servlet 规范的容器运行。Tomcat 是最常见的选择，但不是唯一选择，还可以使用：
+
+- Jetty：轻量，常用于嵌入式运行。
+- Undertow：支持嵌入式使用，也是部分 Java 框架可选择的服务器。
+- WildFly、Payara 等 Jakarta EE 应用服务器：除 Servlet 外还提供更多 Jakarta EE 能力。
+
+Nginx 的定位不同。它主要负责：
+
+- 静态文件服务。
+- HTTPS 证书和 TLS 终止。
+- 反向代理。
+- 负载均衡。
+- 缓存、压缩和访问限制。
+
+Nginx 不运行 JVM，也不会识别 `web.xml`、加载 Java class、创建 Servlet 或管理 Session。因此不能把：
+
+```text
+01-java-web-basics.war
+```
+
+直接部署给 Nginx 运行。
+
+实际部署中，Nginx 和 Tomcat 经常配合使用：
+
+```text
+浏览器
+  -> Nginx :80 / :443
+       -> 静态资源可由 Nginx 直接返回
+       -> /api 请求反向代理到 Tomcat :8080
+            -> Filter
+            -> Servlet / Spring MVC
+            -> Service
+            -> Repository / DAO
+```
+
+例如，Nginx 可以把 `/api/` 转发给本机 Java 服务：
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:8080;
+}
+```
+
+这时真正执行 Java 代码的仍然是 Tomcat，Nginx 只是入口和代理。对于前端开发者，可以把它类比为：Nginx 像对外的网关与静态资源服务器，Tomcat 则是能够理解 Servlet 规范并执行 Java Web 应用的运行容器。
+
+Spring Boot 项目看起来没有单独安装 Tomcat，通常是因为 `spring-boot-starter-web` 默认带有内嵌 Tomcat：
+
+```text
+java -jar application.jar
+  -> Spring Boot 启动 JVM 应用
+  -> 在进程内启动内嵌 Tomcat
+  -> 注册 Spring MVC 的 DispatcherServlet
+  -> 开始监听 HTTP 端口
+```
+
+也可以将内嵌 Tomcat 替换为 Jetty 或 Undertow。变化的是 Servlet 容器实现和启动方式，不是 Servlet/Spring MVC 完全不需要 Web 容器。
+
+还要区分另一类 Java HTTP 服务：使用 Netty、Vert.x 或其他非 Servlet 模型时，可以不使用 Servlet 容器；但这种应用不再是当前 Module 所练习的传统 Servlet Java Web 模型。
+
+因此，更准确的结论是：
+
+```text
+Java 后端          不一定使用 Tomcat
+Servlet 应用       需要兼容 Servlet 规范的容器
+Nginx              不能直接替代 Servlet 容器
+Nginx + Java 容器  是常见的生产部署组合
+```
+
+## 31. 现代 Java 接口服务底层都是 Java Web 或 Spring MVC 吗？
+
+**简短结论：主流 Spring 技术栈的同步 Web 项目通常使用 Spring MVC，而 Spring MVC 底层建立在 Servlet API 之上；但现代 Java 后端并非全部使用 Servlet 或 Spring MVC。**
+
+需要先纠正两个容易混淆的表述：
+
+```text
+错误：Spring MVC 实现了 Servlet API
+正确：Tomcat 等 Servlet 容器实现 Servlet 规范；Spring MVC 使用 Servlet API
+
+错误：Controller 最终会转换成 Servlet 代码
+正确：Controller 始终是普通 Spring Bean，由 DispatcherServlet 调度调用
+```
+
+`jakarta.servlet-api` 主要定义 `Servlet`、`HttpServletRequest`、`HttpServletResponse` 等规范接口和抽象类型。Tomcat 提供这些规范的运行时实现，负责创建请求、响应对象并调用 Servlet。Spring MVC 的 `DispatcherServlet` 继承 Servlet 体系，是运行在容器中的一个核心 Servlet，而不是 Servlet 容器本身。
+
+首先，“Java Web”不是一个与 Spring MVC 并列的单一框架。它通常泛指使用 Java 开发 Web 应用的一组技术；在当前学习阶段，主要指 Servlet、Filter、Listener、Session、JSP 和 Servlet 容器这套传统 Java Web 模型。
+
+当前两阶段可以这样对应：
+
+```text
+原生 Java Web：
+浏览器
+  -> Tomcat
+  -> Filter
+  -> 自己编写的 Servlet
+  -> Service
+  -> DAO
+
+Spring MVC：
+浏览器
+  -> Tomcat
+  -> Filter
+  -> DispatcherServlet
+  -> HandlerMapping / HandlerAdapter
+  -> Controller
+  -> Service
+  -> Repository
+```
+
+Spring MVC 中的 `DispatcherServlet` 本身就是一个 Servlet。它采用前端控制器模式，把大量请求统一接入一个入口，再由框架完成：
+
+- 根据 URL 和 HTTP 方法查找 Controller 方法。
+- 解析路径参数、查询参数、表单和请求体。
+- 把 JSON 转换成 Java 对象。
+- 调用 Controller。
+- 把返回的 Java 对象转换成 JSON。
+- 处理校验结果和异常处理器。
+
+因此，可以说：
+
+> Spring MVC 在 Spring IoC 容器的基础上，对 Servlet Web 开发进行了更高层封装。
+
+但不能简单理解成“Spring MVC 把整个 Java Web 全部包起来了”。容器级扩展点仍然存在：
+
+```text
+Tomcat
+  -> Servlet Filter
+  -> DispatcherServlet
+  -> Spring MVC Interceptor
+  -> Controller
+```
+
+- Filter 属于 Servlet 规范，由 Servlet 容器调用，执行位置通常在 `DispatcherServlet` 外层。
+- `DispatcherServlet` 是 Spring MVC 进入 Servlet 请求链的核心入口。
+- HandlerInterceptor 属于 Spring MVC，只能拦截进入 Spring MVC 处理链的请求。
+- ServletContextListener 等 Listener 仍由 Servlet 容器管理，不是 Controller 注解的替代品。
+
+Spring MVC 的封装主要减少了原生 Servlet 中需要手写的分发与适配代码。例如原生 Servlet 可能需要手动完成：
+
+```java
+String id = request.getParameter("id");
+response.setContentType("application/json;charset=UTF-8");
+response.getWriter().print(...);
+```
+
+Spring MVC 可以声明为：
+
+```java
+@GetMapping("/api/users/{id}")
+public UserResponse getUser(@PathVariable long id) {
+    return userService.getUser(id);
+}
+```
+
+这里并不是 HTTP、Servlet 和 Tomcat 消失了，而是 Spring MVC 的参数解析器、消息转换器和返回值处理器代替开发者完成了重复工作。
+
+也不是把 Controller 源码转换或生成成 Servlet。运行时发生的是对象之间的调用：
+
+```text
+Tomcat 创建 HttpServletRequest / HttpServletResponse
+  -> 调用 DispatcherServlet.service(...)
+  -> DispatcherServlet 查找 HandlerMethod
+  -> HandlerAdapter 解析 Controller 方法参数
+  -> 调用作为 Spring Bean 存在的 Controller 方法
+  -> 返回值处理器处理方法返回值
+  -> HttpMessageConverter 序列化 JSON
+  -> 写入 HttpServletResponse
+```
+
+因此，“最终仍然经过 Servlet 请求链”是正确的；“最终转换成 Servlet 代码”是不正确的。这里是运行时委派和适配，不是源码转换。
+
+### Spring MVC 具体提供了哪些功能
+
+Spring MVC 不是只有 Controller 注解，而是一套围绕 `DispatcherServlet` 组织的请求处理框架。`DispatcherServlet` 主要负责协调流程，具体工作由不同的策略组件完成。
+
+#### 1. 统一请求入口：`DispatcherServlet`
+
+原生 Servlet 项目可能为不同路径编写多个 Servlet，并分别配置映射。Spring MVC 使用前端控制器模式，让请求先进入同一个核心 Servlet：
+
+```text
+/api/users/**
+/api/orders/**
+/api/messages/**
+        -> DispatcherServlet
+```
+
+`DispatcherServlet` 不直接编写用户、订单等业务逻辑。它负责组织后续组件：查找处理器、选择适配器、执行拦截器、处理返回值和异常。
+
+可以类比前端应用中的统一路由入口，但它处理的是服务端 HTTP 请求，而不是浏览器页面切换。
+
+#### 2. 路由映射：`HandlerMapping`
+
+`HandlerMapping` 根据请求信息查找应该执行的处理器。最常用的实现会解析：
+
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @GetMapping("/{id}")
+    public UserResponse getUser(@PathVariable long id) {
+        return userService.getUser(id);
+    }
+}
+```
+
+它不只判断 URL，还可以综合判断：
+
+- HTTP 方法，如 GET、POST、PUT、DELETE。
+- 路径模式，如 `/api/users/{id}`。
+- `Content-Type`，即请求发送的媒体类型。
+- `Accept`，即客户端希望接收的媒体类型。
+- 特定请求参数或请求头条件。
+
+匹配结果通常不是“生成一个 Servlet”，而是得到一个描述 Controller Bean 和目标 Java 方法的 `HandlerMethod`。
+
+#### 3. 处理器适配：`HandlerAdapter`
+
+`DispatcherServlet` 不把所有处理器都写死成一种调用方式，而是通过 `HandlerAdapter` 调用不同类型的处理器。
+
+注解 Controller 最常用的是 `RequestMappingHandlerAdapter`。它负责围绕目标 Controller 方法完成：
+
+```text
+准备方法参数
+  -> 反射调用 Controller 方法
+  -> 处理方法返回值
+```
+
+“Adapter”体现的是适配器设计：`DispatcherServlet` 只依赖统一流程，不需要自己知道每一种 Controller 应如何执行。
+
+#### 4. 方法参数解析：`HandlerMethodArgumentResolver`
+
+原生 Servlet 通常要自己调用 `request.getParameter()`、读取请求头并解析请求体。Spring MVC 可以根据方法参数上的注解选择对应的参数解析器：
+
+```java
+public UserResponse updateUser(
+        @PathVariable long id,
+        @RequestParam boolean enabled,
+        @RequestHeader("X-Request-Id") String requestId,
+        @RequestBody UpdateUserRequest body
+) {
+}
+```
+
+常见来源包括：
+
+| 写法 | 数据来源 |
+| --- | --- |
+| `@PathVariable` | URL 路径变量 |
+| `@RequestParam` | 查询参数或表单字段 |
+| `@RequestHeader` | HTTP 请求头 |
+| `@CookieValue` | Cookie |
+| `@RequestBody` | HTTP 请求体，常见为 JSON |
+| `@ModelAttribute` | 请求参数绑定到 Java 对象 |
+| `HttpServletRequest` | 原始 Servlet 请求对象 |
+
+因此 Spring MVC 没有禁止使用 Servlet API，只是多数业务接口不再需要直接操作它。
+
+#### 5. 类型转换、数据绑定和参数校验
+
+HTTP 中的路径、查询参数最初基本都是字符串。Spring MVC 可以把它们转换为 Java 类型：
+
+```text
+"123"        -> long
+"2026-08-21" -> LocalDate
+"ENABLED"    -> enum
+```
+
+它还可以把一组请求字段绑定到 Java 对象，并配合 Jakarta Bean Validation 执行校验：
+
+```java
+public void createUser(
+        @Valid @RequestBody CreateUserRequest request
+) {
+}
+```
+
+这里需要区分：
+
+- Spring MVC 负责在合适时机触发数据绑定和校验，并收集结果。
+- `@NotBlank`、`@Size` 等约束来自 Jakarta Validation 规范。
+- Hibernate Validator 等实现负责实际执行这些约束。
+
+#### 6. 请求体与响应体转换：`HttpMessageConverter`
+
+前后端分离项目最常用的是 JSON。Spring MVC 的消息转换器负责在 HTTP 字节流和 Java 对象之间转换：
+
+```text
+请求：JSON 字节
+  -> HttpMessageConverter
+  -> CreateUserRequest 对象
+
+响应：UserResponse 对象
+  -> HttpMessageConverter
+  -> JSON 字节
+```
+
+典型 JSON 转换通常由 `MappingJackson2HttpMessageConverter` 调用 Jackson 完成。也就是说：
+
+```text
+Spring MVC 决定何时转换、使用哪个转换器
+Jackson 负责具体 JSON 序列化和反序列化
+```
+
+转换器的选择会参考请求 `Content-Type`、客户端 `Accept` 和 Controller 声明的 `consumes` / `produces`，这属于内容协商的一部分。
+
+#### 7. 方法返回值处理：`HandlerMethodReturnValueHandler`
+
+Controller 方法可以返回多种结果，例如：
+
+- 普通 Java 对象。
+- `ResponseEntity<T>`。
+- `void`。
+- `ModelAndView`。
+- 视图名称字符串。
+- 异步结果类型。
+
+返回值处理器先判断返回值代表什么，再决定后续动作。对于 `@RestController`：
+
+```text
+Controller 返回 Java 对象
+  -> 返回值处理器识别为响应体
+  -> 选择 HttpMessageConverter
+  -> 序列化为 JSON
+```
+
+`ResponseEntity` 还允许 Controller 同时表达状态码和响应头：
+
+```java
+return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(response);
+```
+
+#### 8. 页面渲染：`ViewResolver`
+
+Spring MVC 中的 MVC 原本也包含服务端页面渲染：
+
+```text
+Controller 返回视图名和 Model
+  -> ViewResolver 查找 JSP / Thymeleaf 模板
+  -> 模板渲染 HTML
+  -> 返回浏览器
+```
+
+现代前后端分离项目通常使用 `@RestController` 返回 JSON，因此较少经过视图解析器，但这部分能力仍属于 Spring MVC。Spring MVC 不只等于 REST API 框架。
+
+#### 9. 统一异常处理：`HandlerExceptionResolver`
+
+Controller 或 Service 抛出异常后，不必在每个 Controller 重复写 `try/catch`。Spring MVC 可以通过异常解析机制查找：
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handle(
+            UserNotFoundException exception
+    ) {
+        // 转换为统一 HTTP 响应
+    }
+}
+```
+
+调用链可以简化为：
+
+```text
+Controller / Service 抛出业务异常
+  -> HandlerExceptionResolver
+  -> 找到 @ExceptionHandler
+  -> 生成状态码和错误响应体
+  -> 消息转换器序列化为 JSON
+```
+
+这连接了你在 Java Web 阶段练习的“业务异常 -> HTTP 状态码”，但将转换逻辑从每个 Servlet/Controller 中集中出来。
+
+#### 10. 请求处理链扩展：`HandlerInterceptor`
+
+Spring MVC Interceptor 可以在 Controller 调用前后执行：
+
+```text
+preHandle
+  -> Controller
+  -> postHandle
+  -> 渲染/写响应
+  -> afterCompletion
+```
+
+它适合处理只针对 Spring MVC 请求的日志、权限检查、公共上下文等逻辑。它和 Servlet Filter 的边界是：
+
+```text
+Filter
+  -> Servlet 容器级，位于 DispatcherServlet 外层
+
+HandlerInterceptor
+  -> Spring MVC 处理器级，知道当前匹配的是哪个 Controller 方法
+```
+
+Spring Security 的主要 Web 安全链通常建立在 Servlet Filter 体系上，不应简单归类为 Spring MVC Interceptor。
+
+#### 11. 其他常用 Web 能力
+
+Spring MVC 还提供或整合：
+
+- 文件上传和 `MultipartFile` 参数处理。
+- CORS 跨域配置。
+- Locale、主题和部分国际化支持。
+- Session 属性和 Flash Attribute。
+- Servlet 异步请求、`Callable`、`DeferredResult` 等异步处理入口。
+- 可扩展的参数解析器、返回值处理器、消息转换器和异常解析器。
+
+这些能力仍建立在 Servlet 模型上。异步请求可以释放当前容器线程并稍后完成响应，但不等于整个 Spring MVC 变成了 WebFlux 的响应式运行模型。
+
+### 一次 REST 请求的完整 Spring MVC 链路
+
+把主要组件串起来：
+
+```text
+浏览器发送 POST /api/users，Content-Type: application/json
+  -> Tomcat 解析 HTTP，创建 Request / Response
+  -> Servlet Filter 链
+  -> DispatcherServlet
+  -> HandlerMapping 找到 UserController.create()
+  -> HandlerInterceptor.preHandle()
+  -> RequestMappingHandlerAdapter
+       -> ArgumentResolver 解析参数
+       -> HttpMessageConverter 把 JSON 转成 DTO
+       -> 数据绑定和 @Valid 校验
+       -> 调用 Controller Bean
+  -> Controller 调用 Service Bean
+  -> Service 调用 Repository Bean
+  -> ReturnValueHandler 处理返回对象
+  -> HttpMessageConverter 把对象转成 JSON
+  -> HandlerInterceptor.afterCompletion()
+  -> DispatcherServlet 把响应交还 Tomcat
+  -> Tomcat 写回 HTTP 响应
+```
+
+如果中途抛出异常，则进入 `HandlerExceptionResolver`，找到 `@ExceptionHandler` 后再生成响应。
+
+### Spring MVC 不负责什么
+
+为了避免把整个 Spring 生态都算成 Spring MVC，需要明确：
+
+| 能力 | 主要负责者 |
+| --- | --- |
+| TCP 监听、HTTP 连接、Servlet 生命周期 | Tomcat 等 Servlet 容器 |
+| Bean 创建、依赖注入、AOP 基础 | Spring Core / Spring Context |
+| 路由、参数绑定、Controller 调用、Web 响应 | Spring MVC |
+| JSON 具体序列化算法 | Jackson 等 JSON 库 |
+| 业务规则 | 自己编写的 Service |
+| SQL 与持久化 | JDBC、MyBatis、JPA 等数据访问技术 |
+| 声明式事务 | Spring Transaction |
+| 认证授权 | 常见为 Spring Security |
+| 自动配置与应用启动 | Spring Boot |
+
+因此，“Spring MVC 连接 HTTP 请求与 Spring Bean”可以进一步展开为：
+
+> 它把 Servlet 容器交来的请求，通过路由映射、处理器适配、参数解析、数据绑定和消息转换，适配成一次普通 Spring Controller Bean 方法调用；再把方法返回值或异常适配成 HTTP 响应。
+
+### Spring MVC 是否是现代 Java 接口开发的主流
+
+对于常见的企业级 Java 同步 REST API，尤其是采用 Spring Boot 的项目，可以认为：
+
+> `Spring Boot + Spring MVC` 是最常见、最主流的技术组合之一，在 Spring 技术栈内通常就是默认选择。
+
+常见原因包括：
+
+- Spring Boot 的 `spring-boot-starter-web` 默认配置 Spring MVC 和内嵌 Tomcat。
+- Controller、校验、JSON、异常处理、安全、数据访问和监控生态完整。
+- 大量既有企业项目、开发人员经验和基础设施建立在 Spring 体系上。
+- 对常规管理系统、业务 API 和前后端分离项目，同步阻塞模型通常已经足够，并且更容易开发和维护。
+
+但不能扩大为“现代 Java 接口全部由 Spring MVC 实现”。下列场景可能选择其他方案：
+
+- 响应式、流式或大量长连接场景选择 Spring WebFlux / Reactor Netty。
+- 高性能网络中间件或协议服务直接使用 Netty。
+- 服务间通信选择 gRPC。
+- Quarkus、Micronaut 等技术栈使用自己的 HTTP/REST 集成。
+- Jakarta REST 项目使用 Jersey、RESTEasy 等实现。
+
+所以不需要记一个没有可靠依据的市场百分比。对当前学习与就业判断，更实用的结论是：普通 Java 企业后端和前后端分离 REST API 中，Spring Boot + Spring MVC 的覆盖面非常高，应该优先掌握；同时知道它只是 Java Web 技术路线中的主流方案，而不是唯一方案。
+
+### Spring Boot 在其中的位置
+
+Spring Boot 不是另一套 Web 请求框架。典型的 `spring-boot-starter-web` 项目仍然是：
+
+```text
+Spring Boot
+  -> 自动配置内嵌 Tomcat
+  -> 自动配置 Spring MVC
+  -> 注册 DispatcherServlet
+  -> 扫描 Controller
+```
+
+所以常见关系是：
+
+```text
+Tomcat：Servlet 运行容器
+Spring MVC：基于 Servlet 的 Web MVC 框架
+Spring：提供 IoC、DI、AOP 等基础能力
+Spring Boot：自动组装并启动这些组件
+```
+
+### 不使用 Spring MVC 或 Servlet 的 Java 服务
+
+现代 Java 后端还有其他技术路线：
+
+- Spring WebFlux 使用响应式模型；以 Reactor Netty 启动时不依赖 Servlet API。
+- Netty 可以直接构建事件驱动的网络服务，不使用 Servlet。
+- Vert.x、Armeria 等框架也可以使用非 Servlet 网络模型。
+- gRPC Java 通常使用 HTTP/2 RPC 模型，不是 Spring MVC 的普通 REST 请求链。
+- Jakarta REST（JAX-RS）的 Jersey、RESTEasy 等实现可以提供 REST API；部分部署方式仍可能与 Servlet 容器整合，但它们不是 Spring MVC。
+
+无论采用哪条路线，最底层最终都需要某个网络服务器监听端口、解析协议并把请求交给 Java 代码，只是这个运行时不一定是 Tomcat，也不一定遵循 Servlet 模型。
+
+对当前学习路线，最重要的结论是：
+
+```text
+Servlet / Java Web
+  -> 理解 HTTP 请求在容器中的底层入口
+
+Spring Core
+  -> 理解对象如何由 Spring 创建、注入和代理
+
+Spring MVC
+  -> 把 Servlet 请求链与 Spring 容器连接起来
+
+Spring Boot
+  -> 自动配置并启动 Tomcat、Spring MVC 和其他基础设施
+```
+
+因此，先学习 Servlet 再学习 Spring MVC 并不是重复学习。Servlet 让开发者知道 Spring MVC 帮忙隐藏了什么，Spring Core 则让开发者理解 Controller、Service 和各种框架组件为什么能够被自动创建与注入。
