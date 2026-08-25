@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+<!--        开启数据库下划线字段转JAVA对象驼峰字段-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+<!--        控制台显示数据库执行日志-->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <typeAliases>
+<!--        类型别名，自动匹配对应package下的JAVA类-->
+        <package name="cn.siyes.training.mybatis.model"/>
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+<!--            事务管理-->
+            <transactionManager type="JDBC"/>
+<!--            连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="${db.url}"/>
+                <property name="username" value="${db.username}"/>
+                <property name="password" value="${db.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+<mappers>
+<!--    扫描对应包下的所有mapper，就不用一个个Mapper手动引入-->
+    <package name="cn/siyes/training/mybatis/mapper"/>
+</mappers>
+
+</configuration>

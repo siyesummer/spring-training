@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.siyes.training.mybatis.mapper.TaskCommentMapper">
+    <insert id="insertBatch">
+        INSERT INTO task_comments (task_id, content)
+        VALUES
+        <foreach collection="comments" item="comment" separator=",">
+            (#{comment.taskId}, #{comment.content})
+        </foreach>
+    </insert>
+
+    <select id="findByTaskId" parameterType="Long" resultType="TaskComment">
+        SELECT * FROM task_comments
+        WHERE
+            task_id = #{taskId}
+    </select>
+</mapper>

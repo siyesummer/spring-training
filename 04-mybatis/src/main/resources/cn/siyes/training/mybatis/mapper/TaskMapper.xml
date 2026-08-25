@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.siyes.training.mybatis.mapper.TaskMapper">
+    <select id="findById" parameterType="Long" resultType="Task">
+        Select *
+        FROM
+            tasks
+        WHERE
+            id = #{id}
+    </select>
+
+    <insert id="insert"
+            parameterType="Task"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="id" >
+
+        INSERT INTO tasks
+            (title, description, status, due_date)
+        VALUES (#{title}, #{description}, #{status}, #{dueDate})
+    </insert>
+
+    <update id="update" parameterType="Task">
+        UPDATE tasks
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="dueDate != null">
+                due_date = #{dueDate},
+            </if>
+        </set>
+        WHERE
+            id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM
+            tasks
+        WHERE
+            id = #{id}
+    </delete>
+    
+    <sql id="taskConditions">
+        <where>
+            <if test="query.status != null">
+                AND status = #{query.status}
+            </if>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (
+                    title LIKE CONCAT('%', #{query.keyword}, '%')
+                    OR
+                    description LIKE CONCAT('%', #{query.keyword}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+    
+    <select id="findPage" resultType="Task">
+        SELECT * 
+            FROM tasks
+        <include refid="taskConditions"/>
+        ORDER BY
+        <choose>
+            <when test="query.sortBy == 'dueDate'">
+                due_date
+            </when>
+            <when test="query.sortBy == 'createdAt'">
+                created_at
+            </when>
+            <otherwise>updated_at</otherwise>
+        </choose>
+        <choose>
+            <when test="query.direction == 'asc'">
+                ASC
+            </when>
+            <otherwise>DESC</otherwise>
+        </choose>
+        LIMIT
+            #{size}
+        OFFSET
+            #{offset}
+    </select>
+
+    <select id="count" resultType="Long">
+        SELECT COUNT(*)
+        FROM tasks
+        <include refid="taskConditions"/>
+    </select>
+    
+</mapper>

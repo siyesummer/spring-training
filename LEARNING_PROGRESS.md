@@ -10,7 +10,7 @@
 | Java Web 基础 | 已完成 | 已完成 Tomcat、MySQL、JDBC、用户注册、登录/Session/登出、Filter、Listener、留言板、事务提交/回滚/恢复、WAR 构建和部署复测；核心技术复盘已完成 |
 | Spring Core | 已完成 | `02-spring-core` 已完成 XML 与注解两轮，并通过 IoC/DI、生命周期、AOP、事务、后置处理器和自调用代理边界验收 |
 | Spring MVC | 已完成 | 已完成传统 WAR + Tomcat 下的 `DispatcherServlet`、任务 REST API、四类参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 持久化验收 |
-| MyBatis | 未开始 | 待创建 `04-mybatis` |
+| MyBatis | 已完成 | `04-mybatis` 已完成原生 MyBatis 与 Spring 集成两段练习，通过 Mapper、动态 SQL、一对多映射、手动事务和声明式事务验收 |
 | Spring Boot | 未开始 | 待创建 `05-spring-boot` |
 | Spring Boot 综合项目 | 未开始 | 待创建 `06-spring-boot-comprehensive` |
 
@@ -21,6 +21,7 @@
 - Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力。
 - Spring Core Module 已完成：使用同一个账户转账主题分别完成纯 XML 与纯注解 / Java 配置，两轮放在不同包中，并通过运行结果对照 BeanDefinition 来源、依赖注入、生命周期、AOP、事务和后置处理器机制。
 - Spring MVC Module 已完成：不依赖 Spring Boot，手动注册 `DispatcherServlet` 并完成 MySQL 任务管理 REST API；真实请求、数据库结果、Interceptor 日志、复盘和 WAR 构建均已形成验收证据。
+- MyBatis Module 已完成：使用同一个 `04-mybatis` WAR Module，先通过普通 Java 入口观察原生 MyBatis 的配置、会话、Mapper 代理与手动事务，再接入 Spring 事务和 Spring MVC；Apifox、Navicat、事务回滚、复盘和 WAR 构建均已形成验收证据。
 
 ## Module 验收记录
 
@@ -72,6 +73,22 @@
 - 构建证据：2026-08-22 执行 `mvn -s C:\Users\siyesummer\.m2\settings.xml -pl 03-spring-mvc -am clean package -DskipTests`，根项目和 `03-spring-mvc` 均为 `SUCCESS`，20 个主源码文件编译成功并生成 `target/03-spring-mvc.war`。
 - 能力结论：已达到“能够独立完成并解释最小 Spring MVC REST API”的阶段，能说明 Servlet 容器、`DispatcherServlet`、HandlerMapping、Interceptor、HandlerAdapter、参数解析、校验、Controller、返回值处理和消息转换的主要关系，具备进入 `04-mybatis` 的条件。
 - 当前边界：尚未证明 Spring MVC 内部源码、复杂内容协商、自定义参数解析器、生产级 API 安全与可观测性、Spring Boot 自动配置和完整 Web 集成测试能力。
+
+### 04-mybatis 完成记录（2026-08-25）
+
+- 状态：已完成。
+- Module 形式：同一个 Maven `war` Module 分两段练习；第一段使用普通 Java 入口运行原生 MyBatis，第二段部署到 Tomcat 10.1 并接入 Spring MVC 和 Spring 事务；未使用 Spring Boot 或 MyBatis-Plus。
+- 当前文档：`04-mybatis/README.md` 为阶段总览和最终证据；`docs/MYBATIS_STANDALONE_GUIDE.md`、`docs/MYBATIS_SPRING_GUIDE.md` 分别记录两段引导；`docs/Mybatis验收.md` 记录最终能力评价与机制复盘。
+- 原生框架证据：手写 `mybatis-config.xml` 和 `MyBatisFactory`，能够解释 `SqlSessionFactoryBuilder -> SqlSessionFactory -> SqlSession -> Mapper 动态代理 -> MappedStatement / Executor -> JDBC`；完成 XML CRUD，并用一个注解 SQL 对照。
+- SQL 与映射证据：完成 `<where>`、`<set>`、`<foreach>`、`<choose>`、SQL 片段复用、条件分页、独立总数查询和排序白名单；验证恶意排序输入不会直接拼入 SQL；使用 JOIN、父子 `<id>` 与 `<collection>` 完成任务评论一对多映射。
+- 会话与手动事务证据：在同一个 `SqlSession` 中观察一级缓存；亲手执行 `commit()`、`rollback()` 和资源关闭，Navicat 已确认事务回滚；能够说明 `#{}` 使用预编译参数绑定而 `${}` 是原始文本替换。
+- Spring 集成证据：使用 HikariCP、`SqlSessionFactoryBean`、`@MapperScan`、`SqlSessionTemplate`、`DataSourceTransactionManager` 与 `@Transactional`；Service 直接注入 Mapper 代理，不再手动创建或关闭 `SqlSession`。
+- HTTP 功能证据：Apifox 已验证创建任务及初始评论、按 ID 查询、条件分页、更新、状态修改、删除、详情查询和批量新增评论；清空数据后重新验收，Navicat 中 `tasks` 与 `task_comments` 结果与接口一致。
+- 边界证据：重复删除不存在任务返回 HTTP `404`；JSON DTO 和 `@ModelAttribute` 参数均启用校验，评论请求同时验证集合与集合元素；全局异常处理返回对应 HTTP 状态。
+- Spring 事务证据：创建任务和评论时主动抛出运行时异常，接口返回错误且 Navicat 确认两张表均无新增；删除模拟异常后恢复正常提交，证明两个 Mapper 参与同一 Spring 事务。
+- 构建证据：2026-08-25 执行 `mvn -o -s C:\Users\siyesummer\.m2\settings.xml -pl 04-mybatis -am package -DskipTests`，根项目和 `04-mybatis` 均为 `SUCCESS`；28 个主源码文件和 1 个测试源码文件编译成功，生成 `target/04-mybatis.war`，WAR 已确认包含 Mapper XML 及必要运行依赖。
+- 能力结论：已达到“能够独立使用并解释 MyBatis 基础数据访问与 Spring 集成”的阶段，能区分 MyBatis、`mybatis-spring`、Spring 事务、Spring MVC 和未来 Spring Boot 自动配置各自的职责，具备进入 `05-spring-boot` 的条件。
+- 当前边界：尚未证明二级缓存、自定义 `TypeHandler`、MyBatis 插件、多数据源、复杂事务传播、大数据量 SQL 调优和生产级数据库集成测试能力；这些不属于本阶段完成标准。
 
 后续每个 Module 完成后，记录以下内容：
 

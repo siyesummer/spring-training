@@ -142,6 +142,8 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 
 ### 4.4 `04-mybatis`
 
+完成状态：`已完成`（2026-08-25）。本阶段使用同一个 WAR Module，完成“原生 MyBatis”和“Spring + MyBatis + Spring MVC”两段；SQL 以 XML 为主，使用少量注解 SQL 对照，不引入 Spring Boot 或 MyBatis-Plus。
+
 必须掌握：
 
 - `SqlSessionFactory`、Mapper、映射文件或注解的关系。
@@ -151,9 +153,13 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 - 分页查询、排序白名单和索引意识。
 - 数据库字段、Java 属性、DTO 和领域对象之间的边界。
 
-建议项目：将任务管理 API 接入 MySQL + MyBatis，加入用户、任务、标签或评论等至少两张有关联的表。
+建议项目：延续任务管理领域，使用独立数据库和 `tasks`、`task_comments` 两张一对多关联表。第一段通过普通 Java 入口练习原生 MyBatis；第二段接入 Spring 事务和已有的 Spring MVC 请求层，用 MyBatis Mapper 替换 `JdbcTemplate` Repository。
 
 验收建议：完成 CRUD、条件查询、分页、关联查询和事务回滚；检查 SQL 日志；验证恶意排序字段不能直接拼接进 SQL；说明每个 Mapper 方法对应的 SQL 和返回对象。
+
+引导入口：`04-mybatis/README.md`、`04-mybatis/docs/MYBATIS_STANDALONE_GUIDE.md` 和 `04-mybatis/docs/MYBATIS_SPRING_GUIDE.md`。
+
+验收结果：原生阶段完成 `SqlSessionFactory` / `SqlSession` / Mapper 代理链路、XML CRUD、动态 SQL、分页与排序白名单、批量评论、一对多 JOIN 映射、一级缓存及手动提交/回滚；Spring 集成阶段完成 `SqlSessionFactoryBean`、`@MapperScan`、`SqlSessionTemplate`、Spring MVC 接口和 `@Transactional` 多 Mapper 事务。Apifox 与 Navicat 已验证 CRUD、任务评论关联、输入校验、任务不存在 `404` 和事务回滚；2026-08-25 Maven 离线打包成功，生成 `04-mybatis.war`。复盘见 `04-mybatis/docs/Mybatis验收.md`。
 
 ### 4.5 `05-spring-boot`
 
@@ -241,6 +247,6 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 ## 七、当前起点
 
 - Java 基础：已完成第一轮学习和两个手写项目实践。
-- Java Web + Spring：学习中，`01-java-web-basics`、`02-spring-core` 和 `03-spring-mvc` 已完成，下一步进入 `04-mybatis`。
-- `spring-training`：已完成原生 Java Web、Spring Core 和 Spring MVC 阶段练习；下一阶段学习 MyBatis，继续补全数据访问层能力。
+- Java Web + Spring：`01-java-web-basics`、`02-spring-core`、`03-spring-mvc` 和 `04-mybatis` 已完成，下一阶段进入 Spring Boot。
+- `spring-training`：已完成原生 Java Web、Spring Core、Spring MVC 和 MyBatis 阶段练习；下一阶段创建 `05-spring-boot`，学习自动配置与工程化整合。
 - `linux-server`：主要由 AI 生成，当前仅作为对照阅读和代码审查对象。

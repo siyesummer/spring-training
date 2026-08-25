@@ -1,20 +1,20 @@
 # 当前 Java 能力基线
 
-> 评估日期：2026-08-22
-> 评估依据：用户手写的 `tank-game`、`chat-room`，`01-java-web-basics` 中独立完成的原生 Java Web 实践，`02-spring-core` 中完成的 XML/注解双轮 IoC、DI、生命周期、AOP、事务和后置处理器实践，以及 `03-spring-mvc` 中独立完成的传统 WAR 任务 REST API、真实 HTTP/数据库验收和机制复盘。
+> 评估日期：2026-08-25
+> 评估依据：用户手写的 `tank-game`、`chat-room`，`01-java-web-basics` 中独立完成的原生 Java Web 实践，`02-spring-core` 中完成的 XML/注解双轮 IoC、DI、生命周期、AOP、事务和后置处理器实践，`03-spring-mvc` 中独立完成的传统 WAR 任务 REST API，以及 `04-mybatis` 中完成的原生 MyBatis、Spring 集成、真实 HTTP/数据库验收、事务回滚和机制复盘。
 > `linux-server` 主要由 AI 生成，只作为阅读和审查对象，不计入用户独立编码能力。
 
 ## 一、当前阶段定位
 
 当前水平可以判断为：
 
-> 已完成 Java 基础、Java Web 基础、Spring Core 和 Spring MVC Module 的实践闭环；能够独立完成原生 Java Web 小服务、Spring Core 最小容器练习，以及传统 WAR + Tomcat 下的 Spring MVC REST API。当前准备进入 MyBatis，重点补足 Mapper、动态 SQL 和结果映射能力。
+> 已完成 Java 基础、Java Web 基础、Spring Core、Spring MVC 和 MyBatis Module 的实践闭环；能够独立完成学习型 Java Web 服务、Spring 容器与事务练习、传统 WAR + Tomcat 下的 REST API，以及原生和 Spring 集成两种 MyBatis 数据访问实现。下一阶段进入 Spring Boot，重点理解自动配置如何整合已经掌握的底层框架。
 
 这意味着：
 
 - 已经越过只会语法、控制台小题和单文件练习的阶段。
-- 具备继续学习 MyBatis 和 Spring Boot 的基础。
-- 目前具备的是“能够独立完成和解释学习型 Java Web、Spring Core 与 Spring MVC 最小项目”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
+- 具备继续学习 Spring Boot 并审查其自动配置结果的基础。
+- 目前具备的是“能够独立完成和解释学习型 Java Web、Spring Core、Spring MVC 与 MyBatis 最小项目”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
 - Spring Boot 能力尚未通过独立手写项目和系统验收得到证明。
 
 ## 二、已有能力与代码证据
@@ -190,7 +190,36 @@
 
 综合评价：已具备 Spring MVC 的基础独立实践能力，能够手写并解释最小 REST API 及其主要请求链。能力定位仍是学习型单体 Web 服务的扎实基础，不等同于 Spring MVC 源码能力或生产级后端设计经验。
 
-### 2.9 阶段能力定位
+### 2.9 `04-mybatis` 代码能力评价
+
+本 Module 的原生与 Spring 集成两段代码能够证明以下能力已经从“看过概念”进入“亲手实现并运行”：
+
+- 能手动创建 `SqlSessionFactory` 和 `SqlSession`，获取 Mapper 代理并控制会话、提交、回滚和关闭。
+- 能通过 `namespace + statement id` 说明 Mapper 方法怎样定位 XML SQL，并区分 XML SQL 与注解 SQL 的使用边界。
+- 能使用 `#{}` 完成预编译参数绑定，并通过白名单控制必须使用 SQL 结构文本的排序场景。
+- 能使用 `<where>`、`<set>`、`<foreach>`、`<choose>` 完成动态查询、动态更新、批量操作和排序分支。
+- 能使用 JOIN、`<resultMap>`、父子 `<id>` 与 `<collection>` 将一对多结果行折叠为任务和评论集合，并解释 JOIN 结果行不能直接作为父对象分页依据。
+- 能观察 `SqlSession` 一级缓存，并理解其会话作用域及更新操作对缓存的影响。
+- 能通过 `SqlSessionFactoryBean`、`@MapperScan`、Mapper 动态代理和 `SqlSessionTemplate` 将 MyBatis 接入 Spring。
+- 能让多个 Mapper 在同一个 `@Transactional` Service 方法中共享事务关联的 JDBC Connection，并用异常和 Navicat 结果证明同时回滚。
+
+代码和复盘体现出的主要优点：
+
+- 先隔离 Spring 学习 MyBatis 自身，再接入 Spring，对 `SqlSession` 生命周期和事务职责的理解没有被自动装配隐藏。
+- 不只完成简单 CRUD，还实际实现了动态 SQL、排序安全、批量插入、生成主键、一对多映射和事务组合。
+- 能从 Mapper 参数、XML 表达式、数据库列、Java 属性和 DTO 之间追踪数据映射问题。
+- 能明确接受适合当前项目的 JOIN + `<collection>` 方案，同时了解 `column + select` 及 N+1 边界，没有为了覆盖 API 而增加无收益复杂度。
+
+当前边界：
+
+- 当前 SQL 与分页适合训练数据量，尚未通过执行计划、索引分析或压力数据验证性能。
+- 尚未练习二级缓存、缓存一致性、自定义 `TypeHandler`、MyBatis 插件和复杂映射扩展。
+- 事务练习证明了单数据源下多个 Mapper 的原子性，尚未覆盖复杂传播、多数据源、并发更新和隔离级别问题。
+- 已通过手动请求和数据库结果验证主要链路，但尚未形成生产级数据库集成测试和可观测体系。
+
+综合评价：已具备 MyBatis 的基础独立实践能力，能够手写并解释 Mapper 代理、SQL 映射、动态 SQL、结果映射、会话和 Spring 事务整合。能力定位仍是学习型单体项目的扎实基础，不等同于生产级 SQL 调优或数据访问架构经验。
+
+### 2.10 阶段能力定位
 
 | 能力层级 | 当前判断 | 依据 |
 | --- | --- | --- |
@@ -199,6 +228,7 @@
 | Java Web 工程化 | 初步具备 | 已有 Maven、环境变量、日志、测试和部署意识，但抽象、并发和统一响应仍较原始 |
 | Spring Core | 已具备基础独立实践能力 | `02-spring-core` 完成 XML/注解双轮 IoC、DI、生命周期、AOP、事务、后置处理器与自调用边界 |
 | Spring MVC | 已具备基础独立实践能力 | `03-spring-mvc` 完成传统 WAR 请求链、REST CRUD、参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 验收 |
+| MyBatis | 已具备基础独立实践能力 | `04-mybatis` 完成原生与 Spring 集成两段练习，覆盖 Mapper 代理、动态 SQL、一对多映射、一级缓存、手动事务和声明式事务 |
 | Spring Boot | 尚未证明 | 尚未通过独立训练 Module 证明自动配置、Starter、配置绑定、Profile 和可执行 JAR 能力 |
 | 生产级后端设计 | 尚未证明 | 尚未系统验证并发、连接池、统一错误模型、数据一致性、可观测性和安全边界 |
 
@@ -251,7 +281,7 @@
 
 - Spring MVC 内部源码、自定义参数解析器/消息转换器、复杂内容协商和异步请求处理。
 - Spring AOP 的复杂 Advisor 排序、循环依赖代理和声明式事务的复杂传播组合。
-- MyBatis Mapper、动态 SQL、结果映射和 Spring 事务整合。
+- MyBatis 二级缓存、自定义 `TypeHandler`、插件、复杂映射扩展和生产级 SQL 调优。
 - Spring Boot 自动配置、Starter、Profile、配置绑定和测试体系。
 - 生产级 REST API 的幂等、安全、接口版本、复杂分页和错误模型治理。
 - Web 层测试、数据库集成测试和并发测试。
@@ -285,26 +315,23 @@
 
 ## 六、下一阶段判断标准
 
-当前准备进入 `04-mybatis`。前三个 Module 已证明能够：
+当前已完成 `04-mybatis`。前四个训练 Module 已经证明能够：
 
-- 解释浏览器请求进入 Tomcat、经过 Filter、到达 Servlet 并返回响应的原生链路。
-- 使用 Servlet、Session、JDBC 和事务完成学习型 Web 服务。
-- 使用 Spring 容器创建、注入和管理对象，并观察生命周期回调。
-- 使用 AOP 和声明式事务代理处理横切逻辑与事务边界。
-- 区分 BeanDefinition、目标对象、代理对象，以及理解自调用绕过代理。
-- 通过 `DispatcherServlet`、HandlerMapping、Interceptor 和 HandlerAdapter 将请求路由到 Controller。
-- 使用四种主要参数来源、Jackson、Bean Validation 和全局异常处理完成 REST API 请求与响应。
-- 通过 HikariCP、`JdbcTemplate` 和 Repository 接口完成 MySQL CRUD、筛选与分页。
+- 解释 Servlet 容器、Spring Core、Spring MVC、Spring 事务和 MyBatis 在完整请求链中的职责边界。
+- 使用 Controller、DTO、Service、Mapper 和 MySQL 完成学习型单体 REST API。
+- 使用 Mapper 动态代理、XML/注解 SQL、动态 SQL、批量操作和一对多结果映射完成数据访问。
+- 区分原生 `SqlSession` 的手动生命周期与 Spring 集成后的 `SqlSessionTemplate`、事务 Connection 管理。
+- 通过真实 HTTP 请求、Navicat 数据结果和主动异常验证正常路径与事务回滚。
 
-下一阶段需要重点证明：
+下一阶段 `05-spring-boot` 需要重点证明：
 
-- MyBatis 如何创建 Mapper 代理，以及 Mapper 接口为什么没有手写实现类也能被调用。
-- XML 与注解两种 SQL 映射方式、参数绑定、结果映射和 `#{}` / `${}` 的安全边界。
-- 动态 SQL 如何表达筛选条件，怎样避免将用户输入直接拼接为 SQL 结构。
-- 数据库字段、Java 模型、请求 DTO、响应 DTO 和 Mapper 返回对象之间如何转换。
-- 如何在保持 Controller 和大部分 Service 稳定的前提下，用 MyBatis 替换当前 `JdbcTaskRepository`。
+- Starter 和自动配置怎样根据 classpath、配置属性与条件注解创建 Bean。
+- Boot 自动创建的 Web、Jackson、Validation、DataSource、事务和 MyBatis 基础设施分别对应此前哪些手动配置。
+- `application.yml`、环境变量、Profile 和 `@ConfigurationProperties` 的配置来源、覆盖顺序与类型安全绑定。
+- 如何从零建立 Boot 项目并保持 Controller、Service、Mapper、DTO 和配置职责清晰，而不是只复制现有项目。
+- 如何使用测试分层、可执行 JAR、日志、Actuator 和外部配置完成基本工程化闭环。
 
-`04-mybatis` 应继续保留当前 Spring MVC 请求层，把学习重点集中在数据访问实现和对象映射；不能因为 Mapper 代理减少了 JDBC 样板代码，就跳过 SQL、事务和数据库边界的理解。
+`05-spring-boot` 应继续复用已经掌握的 Spring MVC、事务与 MyBatis 机制，通过对照手动配置理解 Boot 自动装配；不能把“少写配置”误认为底层框架已经消失。
 
 ## 七、能力基线更新规则
 

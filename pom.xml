@@ -13,6 +13,7 @@
     <module>01-java-web-basics</module>
     <module>02-spring-core</module>
     <module>03-spring-mvc</module>
+    <module>04-mybatis</module>
   </modules>
 
   <properties>
@@ -21,6 +22,16 @@
     <mysql.connector.version>8.0.33</mysql.connector.version>
     <junit.jupiter.version>5.10.3</junit.jupiter.version>
     <spring.version>6.2.8</spring.version>
+    <mybatis.version>3.5.19</mybatis.version>
+    <mybatis.spring.version>3.0.4</mybatis.spring.version>
+    <hikaricp.version>5.1.0</hikaricp.version>
+    <slf4j.version>2.0.16</slf4j.version>
+
+    <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+    <jackson.version>2.17.2</jackson.version>
+    <jakarta.validation.version>3.0.2</jakarta.validation.version>
+    <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
+    <jakarta.el.version>4.0.2</jakarta.el.version>
   </properties>
 
   <dependencyManagement>
@@ -41,6 +52,61 @@
         <version>${spring.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+<!--      原生mybatis想关-->
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>${mybatis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis-spring</artifactId>
+        <version>${mybatis.spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.zaxxer</groupId>
+        <artifactId>HikariCP</artifactId>
+        <version>${hikaricp.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+<!--      mybatis-spring相关-->
+      <dependency>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>${jakarta.servlet.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta.validation.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>${hibernate.validator.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish</groupId>
+        <artifactId>jakarta.el</artifactId>
+        <version>${jakarta.el.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

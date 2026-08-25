@@ -14,7 +14,7 @@ E:\本地项目\java-project\spring-training
 
 - 用户主方向是前端开发，正在向全栈开发工程师转型。
 - 已完成 Java 基础学习，并手写了 `tank-game` 和 `chat-room` 两个项目。
-- 已完成 Java Web、Spring Core 和 Spring MVC 阶段训练，下一步学习 MyBatis，后续继续 Spring Boot。
+- 已完成 Java Web、Spring Core、Spring MVC 和 MyBatis 阶段训练；MyBatis 已完成原生框架与 Spring 集成两段练习，下一阶段进入 Spring Boot。
 - 有一个真实 Spring Boot 项目 `E:\本地项目\java-project\linux-server`，但该项目主要由 AI 生成，不是用户独立手写完成的项目。它只能作为阅读、审查、修改和复盘目标，不能直接证明用户已经掌握 Spring Boot。
 - 最终需要在 `spring-training` 中独立完成阶段 Module，并在此基础上看懂 `linux-server` 的结构、流程和实现细节，最后能够独立搭建新的 Spring Boot 项目。
 - 后端、数据库、Linux、部署、Docker 和 Spring Boot 仍处于持续上手阶段，说明默认面向“正在转全栈的前端开发者”。
@@ -175,7 +175,7 @@ E:\本地项目\java-project\linux-server
 ## 当前状态
 
 - Java 基础：已完成第一轮学习和两个项目实践。
-- Java Web + Spring：`01-java-web-basics`、`02-spring-core` 和 `03-spring-mvc` 已完成，下一步进入 `04-mybatis`。
-- `spring-training`：已完成原生 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和部署；Spring Core 的 XML/注解双轮 IoC、DI、生命周期、AOP、事务、后置处理器和自调用代理边界；以及传统 WAR + Tomcat 下的 Spring MVC 请求链、任务 REST API、四类参数绑定、JSON、校验、统一异常、Interceptor、CORS 和 MySQL 持久化练习。
+- Java Web + Spring：`01-java-web-basics`、`02-spring-core`、`03-spring-mvc` 和 `04-mybatis` 已完成，下一阶段为 `05-spring-boot`。
+- `spring-training`：已完成原生 Servlet、Filter、Listener、Session、JDBC、事务、WAR 构建和部署；Spring Core 的 XML/注解双轮 IoC、DI、生命周期、AOP、事务、后置处理器和自调用代理边界；传统 WAR + Tomcat 下的 Spring MVC 请求链、任务 REST API、参数绑定、JSON、校验、统一异常、Interceptor、CORS 和 MySQL 持久化；以及原生 MyBatis 与 Spring 集成两段练习，包括 Mapper 代理、XML/注解 SQL、动态 SQL、分页、排序白名单、批量操作、一对多结果映射、一级缓存、手动事务、`SqlSessionTemplate` 和 Spring 声明式事务。
 - `linux-server`：主要由 AI 生成，当前定位为对照阅读和代码审查对象。
 - 最终验收：能够独立搭建一个有数据库、REST API、校验、测试、配置和部署说明的 Spring Boot 项目。
