@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.siyes.training.boot.mapper.TaskDetailMapper">
+<!--    一对多-->
+    <resultMap id="taskDetailResultMap" type="TaskDetail">
+        <id property="id" column="task_id"/>
+        <result property="title" column="task_title"/>
+        <result property="description" column="task_description"/>
+        <result property="status" column="task_status"/>
+        <result property="dueDate" column="task_due_date"/>
+        <result property="createdAt" column="task_created_at"/>
+        <result property="updatedAt" column="task_updated_at"/>
+
+<!--        评论是多条数据List-->
+        <collection property="comments" ofType="TaskComment">
+            <id property="id" column="comment_id"/>
+            <result property="taskId" column="comment_task_id"/>
+            <result property="content" column="comment_content"/>
+            <result property="createdAt" column="comment_created_at"/>
+        </collection>
+    </resultMap>
+
+    <select id="findDetailById" resultMap="taskDetailResultMap">
+        SELECT t.id          AS task_id,
+            t.title       AS task_title,
+            t.description AS task_description,
+            t.status      AS task_status,
+            t.due_date    AS task_due_date,
+            t.created_at  AS task_created_at,
+            t.updated_at  AS task_updated_at,
+            c.id          AS comment_id,
+            c.task_id     AS comment_task_id,
+            c.content     AS comment_content,
+            c.created_at  AS comment_created_at
+        FROM
+            tasks t
+        LEFT JOIN
+            task_comments c
+        ON
+            c.task_id = t.id
+        WHERE
+            t.id = #{taskId}
+        ORDER BY
+            c.created_at ASC, c.id ASC
+    </select>
+</mapper>

@@ -163,6 +163,8 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 
 ### 4.5 `05-spring-boot`
 
+完成状态：`已完成`（2026-09-01）。本 Module 使用 Spring Boot `4.0.8`、Java `21` 和可执行 Jar，分两轮完成：第一轮为 Boot + JdbcTemplate，第二轮为 Boot + MyBatis。
+
 必须掌握：
 
 - Starter、自动配置、组件扫描和主启动类。
@@ -172,9 +174,11 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 - 日志配置、健康检查和基础 Actuator 使用。
 - 如何从零创建项目，而不是依赖现有项目复制改名。
 
-建议项目：将前面的任务服务整理为一个完整 Boot 项目，完成测试、配置外置、打包和本地真实启动。
+建议项目：将前面的任务服务整理为一个完整 Boot 项目，完成配置外置、打包和本地真实启动；在第二轮接入 MyBatis，保留对底层 Mapper 与事务机制的观察。
 
-验收建议：删除 `target` 后仍可用 `mvn test` 和 `mvn package` 重建；用 `java -jar` 启动；切换 Profile；修改环境变量验证配置覆盖；检查可执行 JAR 是否包含正确依赖；用健康检查验证服务状态。
+验收结果：已通过 Apifox 验证任务 CRUD、条件分页、评论和详情接口；通过 Navicat 对照数据库并验证事务回滚；通过 Profile、环境变量和 Actuator 观察配置与运行状态；完成 SQL 日志、自动配置和 Mapper 扫描观察；执行 `mvn package` 生成可执行 Jar，并用 `java -jar` 独立启动后复测接口。第一轮和第二轮复盘分别见 `05-spring-boot/docs/一阶段复盘.md`、`05-spring-boot/docs/二阶段复盘.md`，自动配置触发过程见 `05-spring-boot/docs/自动配置导入流程.md`。
+
+当前能力边界：已具备 Starter、条件自动配置、配置来源、Profile、JdbcTemplate、MyBatis、事务和可执行 Jar 的基础独立实践能力；尚未覆盖复杂自动配置源码、自定义 Starter、多数据源、生产配置、完整集成测试、高并发与复杂事务传播。
 
 ### 4.6 `06-spring-boot-comprehensive`
 
@@ -247,6 +251,6 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 ## 七、当前起点
 
 - Java 基础：已完成第一轮学习和两个手写项目实践。
-- Java Web + Spring：`01-java-web-basics`、`02-spring-core`、`03-spring-mvc` 和 `04-mybatis` 已完成，下一阶段进入 Spring Boot。
-- `spring-training`：已完成原生 Java Web、Spring Core、Spring MVC 和 MyBatis 阶段练习；下一阶段创建 `05-spring-boot`，学习自动配置与工程化整合。
+- Java Web + Spring：`01-java-web-basics`、`02-spring-core`、`03-spring-mvc`、`04-mybatis` 和 `05-spring-boot` 已完成，下一阶段进入 `06-spring-boot-comprehensive`。
+- `spring-training`：已完成原生 Java Web、Spring Core、Spring MVC、MyBatis 和 Spring Boot 基础阶段练习；下一阶段创建或完善 `06-spring-boot-comprehensive`，验证综合业务设计与工程化闭环。
 - `linux-server`：主要由 AI 生成，当前仅作为对照阅读和代码审查对象。

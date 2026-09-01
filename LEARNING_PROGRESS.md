@@ -11,17 +11,27 @@
 | Spring Core | 已完成 | `02-spring-core` 已完成 XML 与注解两轮，并通过 IoC/DI、生命周期、AOP、事务、后置处理器和自调用代理边界验收 |
 | Spring MVC | 已完成 | 已完成传统 WAR + Tomcat 下的 `DispatcherServlet`、任务 REST API、四类参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 持久化验收 |
 | MyBatis | 已完成 | `04-mybatis` 已完成原生 MyBatis 与 Spring 集成两段练习，通过 Mapper、动态 SQL、一对多映射、手动事务和声明式事务验收 |
-| Spring Boot | 未开始 | 待创建 `05-spring-boot` |
+| Spring Boot | 已完成 | `05-spring-boot` 已完成 JdbcTemplate 与 MyBatis 两轮练习，具备基础独立实践能力 |
 | Spring Boot 综合项目 | 未开始 | 待创建 `06-spring-boot-comprehensive` |
 
 ## 当前结论
 
-- `linux-server` 主要由 AI 生成，当前只作为阅读、审查、修改和复盘目标。
-- 尚未通过 `spring-training` 的独立 Module 证明 Spring Boot 能力。
+- 已通过 `spring-training/05-spring-boot` 的两轮独立练习证明 Spring Boot 基础能力；`linux-server` 主要由 AI 生成，仍只作为阅读、审查、修改和复盘目标。
 - Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力。
 - Spring Core Module 已完成：使用同一个账户转账主题分别完成纯 XML 与纯注解 / Java 配置，两轮放在不同包中，并通过运行结果对照 BeanDefinition 来源、依赖注入、生命周期、AOP、事务和后置处理器机制。
 - Spring MVC Module 已完成：不依赖 Spring Boot，手动注册 `DispatcherServlet` 并完成 MySQL 任务管理 REST API；真实请求、数据库结果、Interceptor 日志、复盘和 WAR 构建均已形成验收证据。
 - MyBatis Module 已完成：使用同一个 `04-mybatis` WAR Module，先通过普通 Java 入口观察原生 MyBatis 的配置、会话、Mapper 代理与手动事务，再接入 Spring 事务和 Spring MVC；Apifox、Navicat、事务回滚、复盘和 WAR 构建均已形成验收证据。
+
+### 05-spring-boot 完成记录（2026-09-01）
+
+- 状态：已完成。Module 使用 Spring Boot `4.0.8`、Java `21`、Maven 和可执行 Jar，内嵌 Tomcat 负责 Web 容器启动。
+- 第一轮（JdbcTemplate）：完成启动类与组件扫描、Starter 与自动配置观察、`application.yml` / 环境变量 / Profile 配置覆盖、Actuator 健康检查、MySQL 数据源、`JdbcTemplate` CRUD、参数校验、统一异常、事务和日志；能够将 Boot 自动创建的基础设施与此前手写 Spring MVC/JDBC 配置对应起来。
+- 第二轮（MyBatis）：完成 MyBatis Starter、`MybatisAutoConfiguration` 条件装配、`@MapperScan`、Mapper 代理、XML 与动态 SQL、批量评论、一对多结果映射、主键回写、SQL 日志和 Spring 声明式事务；Service 中多个 Mapper 能在同一事务中提交或回滚。
+- 手动验收证据：使用 Apifox 验证任务 CRUD、条件分页、状态修改、评论和详情接口；使用 Navicat 对照数据库结果并验证事务回滚；通过切换 Profile 和环境变量确认配置覆盖；通过启动日志确认自动配置和 SQL 执行行为。
+- 构建与运行证据：执行 `mvn package` 成功生成可执行 Jar，使用 `java -jar` 独立启动后再次完成接口和数据库复测；第一轮、第二轮复盘及自动配置导入流程文档已完成。
+- 能力结论：已具备 Spring Boot 基础独立实践能力，能解释 Starter、条件自动配置、组件扫描、配置来源、内嵌 Tomcat、JdbcTemplate、MyBatis Mapper 和声明式事务之间的职责关系。
+- 当前边界：尚未证明复杂自动配置源码、多数据源、生产级连接池与配置、完整集成测试、复杂事务传播、并发一致性和可观测性治理能力；这些留到 `06-spring-boot-comprehensive`。
+- 已知待改进：MyBatis 查询的可选 `status` 参数在实现中直接调用 `status.name()`，未传值时存在空指针风险；本次验收使用明确状态值，后续再补边界处理。
 
 ## Module 验收记录
 
