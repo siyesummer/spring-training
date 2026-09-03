@@ -182,6 +182,8 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 
 ### 4.6 `06-spring-boot-comprehensive`
 
+完成状态：`已完成`（2026-09-03）。项目为独立 Spring Boot `4.0.8`、Java `21`、Maven、Jar Module，包名为 `cn.siyes.training.comprehensive`。第一版主题为订单与库存管理系统。
+
 综合项目不追求功能数量，而追求完整链路：
 
 ```text
@@ -198,6 +200,12 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 - 单元测试、Web 层测试和至少一类数据库集成测试。
 - 外部化配置，敏感信息不进入 Git。
 - Docker 或服务器部署说明、健康检查、日志查看和回滚步骤。
+
+引导与复盘：`06-spring-boot-comprehensive/docs/COMPREHENSIVE_GUIDE.md`、`06-spring-boot-comprehensive/docs/复盘.md`。第一版已完成商品库存查询、订单创建、订单详情、订单取消、库存条件更新、操作日志和事务回滚；按学习边界未引入支付、Redis、消息队列、微服务或安全认证。
+
+验收结果：已使用 Apifox 验证订单创建、订单详情、取消、重复取消、库存不足和异常恢复；使用 Navicat 对照订单、明细、库存和操作日志，确认成功路径多表一致以及异常路径整体回滚；执行 `mvn package` 生成可执行 Jar，并使用 `java -jar` 独立启动后复测接口。当前业务异常遵循 HTTP `200` + 响应体业务 `code` 的项目约定，参数校验和系统异常按实现返回 HTTP `400` / `500`。
+
+能力结论：已具备将 Spring Boot、Spring MVC、MyBatis、事务、数据库建模和外部配置组合成学习型单体业务服务的基础独立实践能力；并发压力、幂等、异步一致性、生产级测试和部署治理仍属于后续提升内容。
 
 最终要提交的不只是代码，还应包括：
 
@@ -251,6 +259,6 @@ Module 名称可以调整，但不要把所有阶段都堆在同一个包里。�
 ## 七、当前起点
 
 - Java 基础：已完成第一轮学习和两个手写项目实践。
-- Java Web + Spring：`01-java-web-basics`、`02-spring-core`、`03-spring-mvc`、`04-mybatis` 和 `05-spring-boot` 已完成，下一阶段进入 `06-spring-boot-comprehensive`。
-- `spring-training`：已完成原生 Java Web、Spring Core、Spring MVC、MyBatis 和 Spring Boot 基础阶段练习；下一阶段创建或完善 `06-spring-boot-comprehensive`，验证综合业务设计与工程化闭环。
+- Java Web + Spring：`01-java-web-basics`、`02-spring-core`、`03-spring-mvc`、`04-mybatis`、`05-spring-boot` 和 `06-spring-boot-comprehensive` 第一版均已完成。
+- `spring-training`：已完成原生 Java Web、Spring Core、Spring MVC、MyBatis、Spring Boot 基础阶段和 `06-spring-boot-comprehensive` 第一版综合业务练习；后续根据整体学习计划继续补强幂等、并发、测试和部署等工程能力。
 - `linux-server`：主要由 AI 生成，当前仅作为对照阅读和代码审查对象。

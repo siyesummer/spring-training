@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.siyes.training.comprehensive.mapper.InventoryMapper">
+    <select id="findByProductId">
+        SELECT * FROM inventories
+        WHERE
+            product_id = #{id}
+    </select>
+
+    <update id="reduceInventory">
+        UPDATE inventories
+        SET
+            available_quantity = available_quantity - #{quantity},
+            version = version + 1
+        WHERE product_id = #{productId}
+            AND available_quantity >= #{quantity}
+            AND version = #{version}
+    </update>
+
+    <update id="increaseInventory">
+        UPDATE inventories
+        SET
+        available_quantity = available_quantity + #{quantity},
+        version = version + 1
+        WHERE product_id = #{productId}
+        AND version = #{version}
+    </update>
+</mapper>

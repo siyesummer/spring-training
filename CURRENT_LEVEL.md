@@ -1,6 +1,6 @@
 # 当前 Java 能力基线
 
-> 评估日期：2026-09-01
+> 评估日期：2026-09-03
 > 评估依据：用户手写的 `tank-game`、`chat-room`，`01-java-web-basics` 中独立完成的原生 Java Web 实践，`02-spring-core` 中完成的 XML/注解双轮 IoC、DI、生命周期、AOP、事务和后置处理器实践，`03-spring-mvc` 中独立完成的传统 WAR 任务 REST API，`04-mybatis` 中完成的原生 MyBatis 与 Spring 集成实践，以及 `05-spring-boot` 中完成的 JdbcTemplate/MyBatis 两轮、自动配置、Profile、可执行 Jar 和真实 HTTP/数据库验收。
 > `linux-server` 主要由 AI 生成，只作为阅读和审查对象，不计入用户独立编码能力。
 
@@ -8,12 +8,12 @@
 
 当前水平可以判断为：
 
-> 已完成 Java 基础、Java Web 基础、Spring Core、Spring MVC、MyBatis 和 Spring Boot Module 的实践闭环；能够独立完成学习型 Java Web 服务、Spring 容器与事务练习、传统 WAR + Tomcat 下的 REST API、原生和 Spring 集成两种 MyBatis 数据访问实现，以及基于 Boot 的 JdbcTemplate/MyBatis 服务。下一阶段进入 `06-spring-boot-comprehensive`，重点验证综合设计和工程化能力。
+> 已完成 Java 基础、Java Web 基础、Spring Core、Spring MVC、MyBatis、Spring Boot 以及 `06-spring-boot-comprehensive` 第一版综合项目的实践闭环；能够独立完成学习型 Java Web 服务、Spring 容器与事务练习、传统 WAR + Tomcat 下的 REST API、原生和 Spring 集成两种 MyBatis 数据访问实现，以及基于 Boot 的单体业务服务。当前重点从“完成技术整合”转向补强幂等、并发、测试和部署等工程边界。
 
 这意味着：
 
 - 已经越过只会语法、控制台小题和单文件练习的阶段。
-- 具备进入 Spring Boot 综合项目、继续审查自动配置结果并整合既有技术的基础。
+- 已完成 Spring Boot 综合项目第一版，具备继续整合既有技术并补强工程边界的基础。
 - 目前具备的是“能够独立完成和解释学习型 Java Web、Spring Core、Spring MVC、MyBatis 与 Spring Boot 最小项目”的能力，暂时不能认定已经具备独立设计生产级 Java 服务的能力。
 - 已具备 Spring Boot 的基础独立实践能力，但能力范围仍限于学习型单体服务；尚未达到生产级 Boot 工程设计水平。
 
@@ -238,7 +238,25 @@
 
 综合评价：已具备 Spring Boot 的基础独立实践能力，能够从配置、自动装配、请求链和数据访问角度解释一个最小 Boot 服务；能力定位仍是学习型单体项目基础，不等同于生产级 Boot 工程经验。
 
-### 2.11 阶段能力定位
+### 2.11 `06-spring-boot-comprehensive` 代码能力评价
+
+本阶段围绕订单、库存和操作日志完成了一个 Spring Boot 单体业务闭环，能够证明以下能力已经从“分别练习技术”进入“按业务组合技术”：
+
+- 能从请求 DTO、数据库表和接口需求拆分商品、库存、订单、明细和操作日志等对象，并说明各自职责边界。
+- 能在 Service 层组合多个 Mapper，使用 `@Transactional` 维护订单、库存、明细和日志的一致性。
+- 能使用 `BigDecimal` 和数据库价格快照计算订单金额，不直接信任客户端金额。
+- 能使用库存条件更新、版本号和受影响行数处理基本并发更新风险，而不是只依赖 Java 层先查后改。
+- 能通过 Apifox、Navicat 和可执行 Jar 验证正常路径、业务失败、异常回滚和独立启动结果。
+
+当前边界：
+
+- 目前的并发控制只完成基本条件更新练习，尚未通过压力测试证明高并发、死锁、重试和库存热点场景。
+- 尚未系统实现幂等键、重复请求防护、复杂订单状态机和异步消息最终一致性。
+- 测试、监控、日志治理、部署回滚和数据库性能调优仍是学习型实现，不能等同于生产级方案。
+
+综合评价：已具备 Spring Boot 综合业务服务的基础独立实践能力，能够把已有框架知识组织成一条可解释、可验证的多表事务链路；后续应继续提高边界设计和工程质量，而不是简单增加接口数量。
+
+### 2.12 阶段能力定位
 
 | 能力层级 | 当前判断 | 依据 |
 | --- | --- | --- |
@@ -249,6 +267,7 @@
 | Spring MVC | 已具备基础独立实践能力 | `03-spring-mvc` 完成传统 WAR 请求链、REST CRUD、参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 验收 |
 | MyBatis | 已具备基础独立实践能力 | `04-mybatis` 完成原生与 Spring 集成两段练习，覆盖 Mapper 代理、动态 SQL、一对多映射、一级缓存、手动事务和声明式事务 |
 | Spring Boot | 已具备基础独立实践能力 | `05-spring-boot` 完成自动配置、Starter、Profile、JdbcTemplate、MyBatis、事务、可执行 Jar 和真实请求/数据库验收 |
+| Spring Boot 综合业务 | 已具备基础独立实践能力 | `06-spring-boot-comprehensive` 完成订单、库存、事务、审计日志、条件更新、异常回滚和可执行 Jar 验收 |
 | 生产级后端设计 | 尚未证明 | 尚未系统验证并发、连接池、统一错误模型、数据一致性、可观测性和安全边界 |
 
 ## 三、两个手写项目的客观评价
@@ -332,9 +351,9 @@
 - 如果每个阶段只新建示例、不测试异常路径，能力会停留在教程复现层面。
 - 如果直接照抄 `linux-server`，会降低独立设计和问题定位的训练效果。
 
-## 六、下一阶段判断标准
+## 六、后续提升重点
 
-当前已完成 `05-spring-boot`。前五个训练 Module 已经证明能够：
+当前已完成 `06-spring-boot-comprehensive` 第一版。前六个训练 Module 已经证明能够：
 
 - 解释 Servlet 容器、Spring Core、Spring MVC、Spring 事务和 MyBatis 在完整请求链中的职责边界。
 - 使用 Controller、DTO、Service、Mapper 和 MySQL 完成学习型单体 REST API。
@@ -342,15 +361,10 @@
 - 区分原生 `SqlSession` 的手动生命周期与 Spring 集成后的 `SqlSessionTemplate`、事务 Connection 管理。
 - 通过真实 HTTP 请求、Navicat 数据结果和主动异常验证正常路径与事务回滚。
 - 解释 Starter、条件自动配置、Profile、内嵌 Tomcat 和可执行 Jar，并在 Boot 中分别使用 JdbcTemplate 与 MyBatis 完成真实数据访问。
+- 在完整订单业务中保持 Controller、Service、Mapper、DTO 和配置职责清晰，并完成需求拆分与数据建模。
+- 设计事务、库存条件更新和错误模型，验证索引、约束及数据一致性。
 
-下一阶段 `06-spring-boot-comprehensive` 需要重点证明：
-
-- 在完整业务中继续保持 Controller、Service、Mapper、DTO 和配置职责清晰，并完成需求拆分与数据建模。
-- 设计更可靠的事务、幂等、并发和错误模型，验证索引、约束及数据一致性。
-- 建立按风险分层的单元测试、Web 测试和数据库集成测试，补足当前手动验收边界。
-- 完成外部配置、日志、健康检查、容器化或服务器部署和回滚说明。
-
-`06-spring-boot-comprehensive` 应继续复用已经掌握的 Spring MVC、事务、MyBatis 与 Boot 自动装配机制；不能把“少写配置”误认为底层框架已经消失。
+后续可按实际项目需要补强：幂等与重复请求防护、高并发库存与重试、复杂状态机、数据库集成测试、生产级日志监控、容器化部署和回滚。`06-spring-boot-comprehensive` 已经完成基础版本，后续不以盲目增加基础设施为目标。
 
 ## 七、能力基线更新规则
 

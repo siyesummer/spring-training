@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: 06-spring-boot-comprehensive
+  datasource:
+    url: ${COMPREHENSIVE_DB_URL}
+    username: ${COMPREHENSIVE_DB_USERNAME}
+    password: ${COMPREHENSIVE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  port: 8087
+
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: cn.siyes.training.comprehensive.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -12,11 +12,12 @@
 | Spring MVC | 已完成 | 已完成传统 WAR + Tomcat 下的 `DispatcherServlet`、任务 REST API、四类参数绑定、JSON、校验、统一异常、Interceptor、CORS 与 MySQL 持久化验收 |
 | MyBatis | 已完成 | `04-mybatis` 已完成原生 MyBatis 与 Spring 集成两段练习，通过 Mapper、动态 SQL、一对多映射、手动事务和声明式事务验收 |
 | Spring Boot | 已完成 | `05-spring-boot` 已完成 JdbcTemplate 与 MyBatis 两轮练习，具备基础独立实践能力 |
-| Spring Boot 综合项目 | 未开始 | 待创建 `06-spring-boot-comprehensive` |
+| Spring Boot 综合项目 | 已完成 | `06-spring-boot-comprehensive` 已完成订单与库存管理系统第一版练习和核心链路验收 |
 
 ## 当前结论
 
 - 已通过 `spring-training/05-spring-boot` 的两轮独立练习证明 Spring Boot 基础能力；`linux-server` 主要由 AI 生成，仍只作为阅读、审查、修改和复盘目标。
+- `06-spring-boot-comprehensive` 已完成订单与库存管理系统第一版；具体设计和验收标准见 `06-spring-boot-comprehensive/docs/COMPREHENSIVE_GUIDE.md`，复盘见 `06-spring-boot-comprehensive/docs/复盘.md`。
 - Java Web 基础 Module 已完成：注册、登录/Session/登出、Filter、Listener、留言板新增/查询、事务提交/回滚/恢复、Maven WAR 构建和实际 WAR 部署均已验证；代码复盘确认已具备独立完成原生 Java Web 小服务的能力。
 - Spring Core Module 已完成：使用同一个账户转账主题分别完成纯 XML 与纯注解 / Java 配置，两轮放在不同包中，并通过运行结果对照 BeanDefinition 来源、依赖注入、生命周期、AOP、事务和后置处理器机制。
 - Spring MVC Module 已完成：不依赖 Spring Boot，手动注册 `DispatcherServlet` 并完成 MySQL 任务管理 REST API；真实请求、数据库结果、Interceptor 日志、复盘和 WAR 构建均已形成验收证据。
@@ -30,7 +31,7 @@
 - 手动验收证据：使用 Apifox 验证任务 CRUD、条件分页、状态修改、评论和详情接口；使用 Navicat 对照数据库结果并验证事务回滚；通过切换 Profile 和环境变量确认配置覆盖；通过启动日志确认自动配置和 SQL 执行行为。
 - 构建与运行证据：执行 `mvn package` 成功生成可执行 Jar，使用 `java -jar` 独立启动后再次完成接口和数据库复测；第一轮、第二轮复盘及自动配置导入流程文档已完成。
 - 能力结论：已具备 Spring Boot 基础独立实践能力，能解释 Starter、条件自动配置、组件扫描、配置来源、内嵌 Tomcat、JdbcTemplate、MyBatis Mapper 和声明式事务之间的职责关系。
-- 当前边界：尚未证明复杂自动配置源码、多数据源、生产级连接池与配置、完整集成测试、复杂事务传播、并发一致性和可观测性治理能力；这些留到 `06-spring-boot-comprehensive`。
+- 当前边界：尚未证明复杂自动配置源码、多数据源、生产级连接池与配置、完整集成测试、复杂事务传播、并发一致性和可观测性治理能力；这些仍是后续提升方向。
 - 已知待改进：MyBatis 查询的可选 `status` 参数在实现中直接调用 `status.name()`，未传值时存在空指针风险；本次验收使用明确状态值，后续再补边界处理。
 
 ## Module 验收记录
@@ -99,6 +100,18 @@
 - 构建证据：2026-08-25 执行 `mvn -o -s C:\Users\siyesummer\.m2\settings.xml -pl 04-mybatis -am package -DskipTests`，根项目和 `04-mybatis` 均为 `SUCCESS`；28 个主源码文件和 1 个测试源码文件编译成功，生成 `target/04-mybatis.war`，WAR 已确认包含 Mapper XML 及必要运行依赖。
 - 能力结论：已达到“能够独立使用并解释 MyBatis 基础数据访问与 Spring 集成”的阶段，能区分 MyBatis、`mybatis-spring`、Spring 事务、Spring MVC 和未来 Spring Boot 自动配置各自的职责，具备进入 `05-spring-boot` 的条件。
 - 当前边界：尚未证明二级缓存、自定义 `TypeHandler`、MyBatis 插件、多数据源、复杂事务传播、大数据量 SQL 调优和生产级数据库集成测试能力；这些不属于本阶段完成标准。
+
+### 06-spring-boot-comprehensive 完成记录（2026-09-03）
+
+- 状态：已完成。Module 使用 Spring Boot `4.0.8`、Java `21`、Maven 和可执行 Jar，主题为订单与库存管理系统。
+- 功能范围：完成商品与库存查询、订单创建、订单详情、订单取消、重复取消、库存不足和异常恢复；未引入支付、Redis、消息队列、微服务或安全认证。
+- 分层与数据建模：完成 Controller、DTO、Service、Mapper、异常处理和配置的职责划分；使用 `products`、`inventories`、`orders`、`order_items`、`operation_logs` 表表达业务关系，并通过外键、唯一约束、检查约束和索引提供数据库层保护。
+- 事务与一致性证据：创建订单时统一处理库存扣减、订单主表、订单明细和操作日志；取消订单时统一处理库存恢复、状态修改和取消日志。主动制造运行时异常后，使用 Navicat 确认相关修改一起回滚；恢复代码后再次提交成功。
+- 并发边界：库存扣减使用 `available_quantity >= quantity` 和 `version` 条件更新，并检查受影响行数，能够解释先查后改的竞态风险及乐观锁式条件更新的基本思想。
+- HTTP 与业务协议：使用 Apifox 完成正常路径、库存不足、重复取消和异常恢复验证。当前项目业务异常采用 HTTP `200` + 响应体 `code=400` 的约定，参数校验和未预期系统异常按实现返回 HTTP `400` / `500`。
+- 构建与运行证据：执行 `mvn package` 生成可执行 Jar，使用 `java -jar` 独立启动后完成接口和数据库复测；数据库人工操作均通过 Navicat 完成。
+- 能力结论：已具备围绕单体业务独立组织 Spring Boot、Spring MVC、MyBatis、事务、数据库建模和配置的基础实践能力，能解释从 HTTP 请求到多表事务提交的主要链路。
+- 当前边界：幂等、高并发库存、复杂状态机、消息最终一致性、多数据源、生产级测试、监控告警和部署治理尚未系统验证，不将本阶段完成等同于生产级后端设计能力。
 
 后续每个 Module 完成后，记录以下内容：
 
